@@ -118,15 +118,16 @@ Skyddet är detsamma som för exporten: `npm run kontroll` (och bygget, som kör
 Så når ett nytt läge den publicerade sidan, från början till slut:
 
 1. **Exportera** i den privata arbetsmappen, som ovan. Kommandot skriver `src/data/lage.json` i den här mappen.
-2. **Läs diffen:** `git diff src/data/lage.json`. Det är fritext ur korten; står något där som inte ska bli publikt, ändra kortet och exportera igen.
+2. **Läs diffen:** `git diff src/data/lage.json`. Det är fritext ur korten, och den blir publik. Kontrollen stoppar id:n, namn och sökvägar, men inte allt: kundnamn, och detaljer om ett fel som ännu inte är rättat och utgivet, ska inte stå där. Står något sådant där: ändra kortet och exportera igen.
 3. **Bygg:** `npm run build`. Kontrollen av publik text körs före och efter bygget, och länkkontrollen efter.
 4. **Checka in** det som ändrats, och `git commit` med skälet i brödtexten:
    - en textändring: `git add src/content/docs/<sida>.mdx`;
    - läget: `git add src/data/lage.json`.
-5. **Pusha** till grenen som Dokploy bygger från, med `git push`.
-6. **Dokploy bygger om** sidan när grenen får en push, om automatisk driftsättning är påslagen i applikationen. Annars startas bygget med **Deploy** i Dokploy. Kontrollera i byggloggen att bygget och kontrollen gick igenom, och öppna sidan.
+5. **Pusha** till `main`, som Dokploy bygger från: `git push`.
+6. **Starta bygget** med **Deploy** i appen i Dokploy. En push bygger inte om sidan av sig själv; det kräver Dokploys webhook i förrådets inställningar på GitHub (Settings → Webhooks, med adressen från appens Deployments-flik).
+7. **Kontrollera** att startsidan visar den nya tiden efter "Läget uppdaterades". Står den gamla tiden kvar har bygget fallerat, och byggloggen i Dokploy säger varför.
 
-Samma väg gäller för en ändrad text, utan steg 1 och 2.
+Samma väg gäller för en ändrad text, utan steg 1 och 2; i steg 7 öppnas då den ändrade sidan.
 
 ## Förhandsvisa
 
@@ -164,8 +165,8 @@ Skriv commit-meddelandet på svenska, med skälet i brödtexten.
 
 1. Skapa en **Application** som bygger från förrådet.
 2. Välj byggtypen **Nixpacks**. Den väljer Node-version ur `engines` i `package.json` (22.23.4 eller senare), installerar med `npm ci` och kör `npm run build`. Kontrollera i byggloggen vilken Node som valdes; sidan är byggd och provad med Node 22, som `.nvmrc` säger.
-3. Sätt **Publish Directory** till `dist`. Då serveras de byggda filerna som en statisk sida.
-4. Slå på lösenordet under **Advanced → Security** (Basic Auth) innan adressen delas. Ett användarnamn och ett lösenord räcker för teamet.
-5. Använd HTTPS, och publicera inte containerns port direkt på värden, så att all trafik går genom inloggningen.
+3. Sätt **Publish Directory** till `./dist`. Då serveras de byggda filerna av nginx som en statisk sida.
+4. Lägg till domänen med port 80, HTTPS och Let's Encrypt. Publicera inte containerns port direkt på värden.
+5. Sidan är publik tills vidare. Ska den skyddas: slå på Basic Auth under **Advanced → Security**. Ett användarnamn och ett lösenord räcker för teamet.
 
-Lösenordet skyddar bara den byggda sidan. Det skyddar inte förrådet: är förrådet publikt kan vem som helst läsa allt som är incheckat, också `src/data/lage.json` och historiken. Därför får förrådet bara innehålla det som tål att vara publikt, och därför finns kontrollen ovan.
+Ett lösenord skyddar bara den byggda sidan. Det skyddar inte förrådet: är förrådet publikt kan vem som helst läsa allt som är incheckat, också `src/data/lage.json` och historiken. Därför får förrådet bara innehålla det som tål att vara publikt, och därför finns kontrollen ovan.

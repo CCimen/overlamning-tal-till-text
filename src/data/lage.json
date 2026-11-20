@@ -1,10 +1,10 @@
 {
-  "hamtad": "2026-11-20T13:47+01:00",
-  "github_hamtad": "2026-11-20T13:47+01:00",
+  "hamtad": "2026-11-20T20:19+01:00",
+  "github_hamtad": "2026-11-20T20:19+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
-      "klara": 5,
+      "klara": 6,
       "totalt": 26,
       "nasta": "Kärnans besked när en körning eller en del av den är borttagen",
       "pausad": null
@@ -56,7 +56,7 @@
     {
       "rubrik": "Ett befintligt fel i talaridentifieringen rättas först, före arbetet med tjänstens kopia",
       "lage": "Rättningen av ett befintligt fel i talaridentifieringen är byggd och granskas innan den ges ut; läsningen i ett steg och loggarna kommer efter.",
-      "vantar": "rättningen av fynden från granskningen"
+      "vantar": "Beslut om en ny version"
     },
     {
       "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",

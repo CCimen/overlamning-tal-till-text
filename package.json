@@ -1,0 +1,22 @@
+{
+  "name": "overlamning-webb",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4",
+    "npm": ">=10.9.9"
+  },
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "kontroll": "node scripts/kontroll.mjs",
+    "prebuild": "node scripts/kontroll.mjs src astro.config.mjs README.md",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "postbuild": "node scripts/kontroll.mjs dist && node scripts/lankar.mjs dist",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.42.5",
+    "astro": "7.4.13",
+    "starlight-theme-flexoki": "0.3.0"
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "hamtad": "2026-11-20T11:22+01:00",
+  "github_hamtad": "2026-11-20T11:22+01:00",
+  "kedjor": [
+    {
+      "namn": "Första leveransen till eneo-test",
+      "klara": 5,
+      "totalt": 26,
+      "nasta": "Kärnans besked när en körning eller en del av den är borttagen",
+      "pausad": null
+    },
+    {
+      "namn": "MFA",
+      "klara": 2,
+      "totalt": 7,
+      "nasta": null,
+      "pausad": "väntar på eneo-test"
+    },
+    {
+      "namn": "Filernas hemvist",
+      "klara": 0,
+      "totalt": 3,
+      "nasta": null,
+      "pausad": "väntar på eneo-test"
+    },
+    {
+      "namn": "Gallring i övrigt",
+      "klara": 3,
+      "totalt": 6,
+      "nasta": null,
+      "pausad": null
+    },
+    {
+      "namn": "Kit och modul",
+      "klara": 0,
+      "totalt": 5,
+      "nasta": null,
+      "pausad": "kitet väntar på MFA, och den krypterade transporten hör till produktionen"
+    },
+    {
+      "namn": "Nyckel och dokumentation",
+      "klara": 3,
+      "totalt": 3,
+      "nasta": null,
+      "pausad": null
+    },
+    {
+      "namn": "Flöden och slutet",
+      "klara": 0,
+      "totalt": 2,
+      "nasta": null,
+      "pausad": "väntar på valet mellan låst avbild och release"
+    }
+  ],
+  "pagar": [
+    {
+      "rubrik": "Ett befintligt fel i talaridentifieringen rättas först, före arbetet med tjänstens kopia",
+      "lage": "Rättningen av ett befintligt fel i talaridentifieringen är byggd och granskas innan den ges ut; läsningen i ett steg och loggarna kommer efter.",
+      "vantar": "rättningen av fynden från granskningen"
+    },
+    {
+      "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",
+      "lage": "Talaridentifieringens kopia ska vara borta när Eneo har sparat resultatet. Första delen är byggd och granskad: att resultatet läses i ett steg håller, men loggarna behöver rättas där de skrivs. Arbetet delas därför om: först en rättning av ett befintligt fel i tjänsten, sedan läsningen, sedan loggarna. Borttagningen på begäran byggs efter en ny granskning.",
+      "vantar": "rättningen av det befintliga felet först; sedan byggs läsningen i ett steg och loggarna rättas där de skrivs."
+    },
+    {
+      "rubrik": "Reglerna för gallring i Flöden som körbara exempel, kantfallen och mätningen av en riktig körning",
+      "lage": "Reglerna för gallring per space, flöde och steg är provade mot kärnans befintliga regel och granskade i tre omgångar som letade kantfall. Ordningen för bygget är bestämd; det som återstår här är att mäta en riktig körning.",
+      "vantar": "att en riktig körning mäts på Flödes-grenen, som nu har synken."
+    },
+    {
+      "rubrik": "Filens ägare döps om och ursprunget skrivs på filraden",
+      "lage": "Granskningen av hela ändringen hittade inga fel i koden; fem små rättningar återstår (tre prov, två texter) innan den kan läggas upp för granskning på GitHub. Uppgraderingen med en miljon syntetiska filrader på lokal PostgreSQL 16 tog 4,3 sekunder, varav det nya steget 0,07.",
+      "vantar": "beslut om vem som tar arbetet vidare på Flödes-grenen, och en giltig OpenAI-nyckel i provmiljön; provet med riktiga modeller är inte gjort på den senaste versionen."
+    }
+  ],
+  "beslut": [
+    {
+      "rubrik": "Vilka användare och data möter eneo-test vid första driftsättningen",
+      "text": "Vilka som ska använda eneo-test först, och med vilka data, avgör om två skyddssteg för flödesfiler och modellval måste vara klara före uppgraderingen eller först innan verksamheterna bjuds in.",
+      "prioritet": 1
+    },
+    {
+      "rubrik": "Påminnelse innan en oanvänd API-nyckel går ut, nu när policyn verkligen stänger av",
+      "text": "Ska administratören se hur många API-nycklar nattens körning kommer att stänga, innan de slutar fungera? Förslaget är ja, som ett litet eget steg på develop.",
+      "prioritet": 1
+    },
+    {
+      "rubrik": "Hur den som tar över får ärendelistan",
+      "text": "I dag finns ärendelistan bara lokalt hos den som leder arbetet. Förslaget är en privat kopia som den som tar över uppdaterar själv.",
+      "prioritet": 1
+    },
+    {
+      "rubrik": "Ska ett space som redan har en gallringstid börja ta bort flödeskörningar direkt efter uppgraderingen",
+      "text": "Ska ett space som redan har en gallringstid börja ta bort flödeskörningar direkt efter uppgraderingen? Tills vidare gäller att inget tas bort förrän en administratör har sett hur mycket som berörs och slagit på det.",
+      "prioritet": 1
+    },
+    {
+      "rubrik": "Tak för en turs indatatoken: en dokumenterad stopptröskel eller ett verkligt tak med kontroll före nästa anrop",
+      "text": "Ett enda svar kan i dag dra mycket stora mängder indata när det gör många verktygsanrop. Frågan är om gränsen ska vara en tröskel som stoppar efteråt eller ett verkligt tak som kontrolleras före varje nytt anrop.",
+      "prioritet": 2
+    },
+    {
+      "rubrik": "Ett verktygsanrop till ett verktyg som inte erbjöds: neka hela turen eller svara anropet med 'inget sådant verktyg'",
+      "text": "När en modell ber om ett verktyg den inte har fått nekas hela svaret i dag. Frågan är om anropet i stället ska besvaras med 'inget sådant verktyg', utan att köras, så att modellen kan fortsätta.",
+      "prioritet": 2
+    },
+    {
+      "rubrik": "Kopplingen mellan en modul och en riktig Eneo byggs i den smalnade formen",
+      "text": "Kopplingen mellan en modul och en riktig Eneo: guiden och en säker lokal start byggs nu, och ett kontrollkommando först när Eneo kan svara på om en nyckel hör till modulen. Väntar på ett ja eller nej.",
+      "prioritet": 2
+    },
+    {
+      "rubrik": "IdP:ns token- och JWKS-värdar",
+      "text": "Token-adressen och nycklarna ligger på samma värd som utfärdaren i den OneGate som eneo-test använder (läst i discovery-dokumentet 13 november), så inga extra värdar behöver läggas in där. Samma kontroll återstår för produktionen.",
+      "prioritet": 2
+    },
+    {
+      "rubrik": "Vilka andra system än Eneo använder talaridentifieringen i drift",
+      "text": "Vilka andra system än Eneo skickar ljud till talaridentifieringen i drift? Svaret avgör vilka som berörs när tjänsten ändrar hur resultat hämtas och tas bort. Alla tre sätten att hämta ett resultat provas ändå.",
+      "prioritet": 2
+    },
+    {
+      "rubrik": "Provstackens OpenAI-nyckel nekas",
+      "text": "Den lokala provmiljön för första leveransen får nej från OpenAI, eftersom nyckeln där inte längre gäller. Körningen med riktiga modeller kan inte provas förrän nyckeln är bytt; körningen med låtsasmodeller är grön.",
+      "prioritet": 2
+    },
+    {
+      "rubrik": "IdP-prov: läs värdet som betyder MFA i en riktig id-token, med negativt fall",
+      "text": "En testinloggning ska visa att biljetten bär ett värde som betyder MFA, och att en inloggning utan MFA saknar det. IdP- och IDM-gruppen ställer in värdet i OneGate, MobilityGuard svarar på hur det görs och vad de rekommenderar, och Eneo-teamet gör inloggningen.",
+      "prioritet": 2
+    },
+    {
+      "rubrik": "Tokenbudget per API-nyckel: ska ett förslag tas fram",
+      "text": "Skriptade klienter kan förbruka obegränsat med en API-nyckel. Frågan är om ett förslag på en budget per nyckel ska tas fram. Det kan vänta.",
+      "prioritet": 3
+    },
+    {
+      "rubrik": "Löftet om oförändrade avslag behöver ett undantag för modulens sessionsslut",
+      "text": "Planens löfte att modulen skickar Eneos avslag oförändrade får ett undantag när Eneo själv har avslutat inloggningen; väntar på besked.",
+      "prioritet": 3
+    },
+    {
+      "rubrik": "Ska en gammal nyckel inom rotationens frist få roteras igen och flytta fristen?",
+      "text": "Ska en gammal API-nyckel som redan har ersatts kunna ersättas en gång till under övergångstiden, så att övergångstiden flyttas fram? I dag går det.",
+      "prioritet": 3
+    },
+    {
+      "rubrik": "Release/v2.3 har troligen opentelemetry-api 1.45.1",
+      "text": "Beslut behövs om den utgivna versionen 2.3 ska få den rättade OpenTelemetry-versionen; inget görs i den utgivna versionen utan det.",
+      "prioritet": 3
+    }
+  ],
+  "github": {
+    "804": [
+      {
+        "forrad": "eneo",
+        "nummer": 807,
+        "titel": "[Task]: Verify that OneGate's ID token tells sign-ins with and without MFA apart",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 808,
+        "titel": "[Task]: Record MFA on the session at sign-in, by the organisation's rule",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 809,
+        "titel": "[Task]: Check the space's MFA requirement at the entrance, and let administrators switch it on",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 810,
+        "titel": "[Task]: Read files with the reader's own sign-in instead of bearer links",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 811,
+        "titel": "[Task]: Add MFA settings and resumable verification in Eneo",
+        "tillstand": "stängt som inte planerat"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 812,
+        "titel": "[Task]: End module access and live transcription when the Eneo session ends",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 813,
+        "titel": "[Task]: Make flows and their files follow the space's MFA requirement",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo-mod-speech-to-text",
+        "nummer": 6,
+        "titel": "[Task]: Follow the space's MFA requirement in the speech-to-text module",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1385,
+        "titel": "[Task]: Verify every OIDC sign-in in one provider-neutral relying party",
+        "tillstand": "stängt som klart"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1387,
+        "titel": "[Task]: Remove the legacy MobilityGuard sign-in",
+        "tillstand": "stängt som klart"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1393,
+        "titel": "[Task]: Remove the deprecated Zitadel sign-in mode",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1392,
+        "titel": "[Task]: Deprecate the Zitadel sign-in mode",
+        "tillstand": "stängt som klart"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1409,
+        "titel": "[Task]: Bind accounts to provider identities and end sessions on sign-out",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1422,
+        "titel": "[Task]: Sign people in when the identity provider sends malformed optional claims",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1423,
+        "titel": "[Task]: Give files a home space, and make space deletion and assistant transfer handle it",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1424,
+        "titel": "[Task]: Set a file's home when it is created or attached, and fill it in for existing files",
+        "tillstand": "öppet"
+      }
+    ],
+    "1425": [
+      {
+        "forrad": "eneo",
+        "nummer": 1426,
+        "titel": "[Task]: Add the error for a period above its cap, and the answer a retention preview gives",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1427,
+        "titel": "[Task]: Clean up flow leftovers on a schedule, and keep flow audit rows and run errors free of content",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1429,
+        "titel": "[Task]: Remove a flow authoring chat's hidden assistant and settings when retention removes the chat",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1428,
+        "titel": "[Task]: Give flow runs one retention period per level, capped by the space, and remove expired runs automatically",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1430,
+        "titel": "[Task]: Let a flow step keep its content for a shorter time in hours, and remove its copies with it",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1431,
+        "titel": "[Task]: Remove a run's recording and its live transcript a chosen number of hours after the run ends",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1433,
+        "titel": "[Task]: Keep attachment names out of app update audit rows",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1432,
+        "titel": "[Task]: Cap assistants and apps by their space's retention period, and let the organisation set its own",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1434,
+        "titel": "[Task]: Merge the Flows branch into develop behind the Flows switch",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo",
+        "nummer": 1435,
+        "titel": "[Task]: Test the whole speech-to-text chain in a running installation with a real identity provider",
+        "tillstand": "öppet"
+      },
+      {
+        "forrad": "eneo-mod-speech-to-text",
+        "nummer": 96,
+        "titel": "[Task]: Keep unsent recordings in the speech-to-text module for a bounded time, and forget them when Eneo removes the content",
+        "tillstand": "öppet"
+      }
+    ]
+  }
+}

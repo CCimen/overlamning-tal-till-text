@@ -1,0 +1,388 @@
+---
+title: Space och ägande i Eneo
+description: Varför MFA på ett space kräver att vi rättar vem som äger filerna, hur ett space fungerar i dag, hur vi löser det och i vilken ordning det byggs fram till tal till text i produktion.
+tableOfContents:
+  maxHeadingLevel: 2
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+<p><small>Eneo · arkitektur</small></p>
+
+Varför MFA på ett space kräver att vi rättar vem som äger filerna, hur ett space fungerar i dag, hur vi löser det och i vilken ordning det byggs fram till tal till text i produktion.
+
+<Badge text="nuläget är kartlagt i koden" variant="success" /> <Badge text="målbilden är inte byggd än" variant="caution" /> <Badge text="pausat: byggs inte nu" variant="caution" /> Designen är granskad två gånger av två oberoende granskare, som läste koden och inte körde något.
+
+:::note
+**Pausat.** Space, ägande och MFA byggs efter eneo-test, och förslaget på den här sidan fastställs innan bygget börjar. När en person slutar ska behöriga kollegor kunna fortsätta arbeta med delade flöden och filer, och den som startade en körning finns kvar i historiken. I dag hänger flöden, körningar och filer på personen. Flödets personliga ägare tas bort redan före eneo-test (steg 1.6); filernas hemvist byggs här. Modulens tjänstenyckel är redan knuten till organisationens modulinstallation.
+:::
+
+## Kort sagt
+
+1. **Kravet sitter på spacet.** Spacet är den delade ytan och det enda stället någon orkar sköta, så det finns inga val per flöde, fil eller nedladdning. Ett vanligt delat space kan kräva MFA, också ett som redan finns. Organisationens space och personliga space kan det inte. Flöden, filer och modulen för tal till text följer spacet.
+2. **IdP:n avgör om inloggningen var MFA.** IdP:n (identity provider) är tjänsten som loggar in personen, egen eller köpt, och den vet redan hur personen loggade in. Eneo läser ja eller nej ur den signerade biljetten enligt organisationens regel och sparar svaret på sessionen när den skapas. En session går aldrig från nej till ja, så den som saknar MFA loggar in igen och får en ny session.
+3. **Med dagens datamodell skulle kravet inte nå filerna,** eftersom en fil hänger på personen som laddade upp den. Därför får varje fil en hemvist, ett space, och behåller sin koppling till den som skapade den. En fil används bara i sitt eget space. Den som vill ha den i ett annat space laddar upp den där.
+4. **Filer läses med den egna inloggningen,** inte med länkar som vem som helst kan använda, och varje anrop utifrån som rör ett space som kräver MFA prövas vid ingången. Kunskap påverkas inte, eftersom den redan hör till ett space.
+5. **Reglaget prövar spacet innan kravet gäller.** Är något i spacet inte skyddat blir svaret nej, med ett skäl som går att åtgärda. Filer som redan används i två space fortsätter att fungera, men de listas, och de spacen kan inte kräva MFA förrän det är utrett.
+
+## Problemet: innehåll hänger på personen
+
+Eneo byggdes troligen först för en användare, och delade ytor lades till efteråt. Det syns i datamodellen. Ett space äger det mesta, men tre saker hänger fortfarande på personen: filer, prompter och samtal.
+
+Ett exempel. Lena spelar in ett möte i ett space som kräver MFA, och ljudfilen sparas som Lenas fil, inte som spacets. Den kan därför hämtas av den som bara har Lenas lösenord, eller av den som har fått en kopierad länk.
+
+<figure class="figur">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+        <svg viewBox="0 0 760 300" role="img" aria-label="I dag äger spacet assistenter, appar och kunskap, medan filer, prompter och samtal hänger på personen. Samtalet når spacet genom assistenten, men filen har ingen koppling till spacet.">
+        <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <rect x="20" y="30" width="230" height="240" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="36" y="56" font-size="13" font-weight="600">Personen</text>
+        <rect x="36" y="76" width="198" height="44" rx="8" style="fill:var(--bad-soft);stroke:var(--bad)" stroke-width="1.5"/>
+        <text x="50" y="103" font-size="13" font-weight="600">Filer</text>
+        <rect x="36" y="136" width="198" height="44" rx="8" fill="none" stroke="currentColor" stroke-width="1"/>
+        <text x="50" y="163" font-size="13">Prompter</text>
+        <rect x="36" y="196" width="198" height="44" rx="8" fill="none" stroke="currentColor" stroke-width="1"/>
+        <text x="50" y="223" font-size="13">Samtal</text>
+        <rect x="510" y="30" width="230" height="240" rx="10" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <text x="526" y="56" font-size="13" font-weight="600">Spacet</text>
+        <rect x="526" y="76" width="198" height="44" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="540" y="103" font-size="13">Kunskap, widgetar, skills</text>
+        <rect x="526" y="136" width="198" height="44" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="540" y="163" font-size="13">Appar och tjänster</text>
+        <rect x="526" y="196" width="198" height="44" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="540" y="223" font-size="13">Assistenter</text>
+        <line x1="234" y1="218" x2="522" y2="218" stroke="currentColor" stroke-width="1.5" marker-end="url(#a1)"/>
+        <text x="378" y="208" font-size="12" text-anchor="middle">når spacet genom assistenten</text>
+        <line x1="234" y1="98" x2="440" y2="98" style="stroke:var(--bad)" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <line x1="432" y1="88" x2="452" y2="108" style="stroke:var(--bad)" stroke-width="2"/>
+        <line x1="452" y1="88" x2="432" y2="108" style="stroke:var(--bad)" stroke-width="2"/>
+        <text x="342" y="86" font-size="12" text-anchor="middle" style="fill:var(--bad)">ingen koppling till spacet</text>
+      </svg>
+</div>
+<figcaption>I dag. Samtalet hittar sitt space genom assistenten. Filen gör det inte: den hör till personen, och innehållet hämtas med en länk som gäller för den som har den.</figcaption>
+</figure>
+
+### Följd för MFA
+
+- Ett krav på spacet når inte filen.
+- En länk till en fil kan gälla upp till 7 dygn och går inte att återkalla.
+- Samma fil kan bifogas i flera space.
+
+### Följd för flytt och borttagning
+
+- Flytt ändrar en kolumn. Filerna följer inte med.
+- Ett space som tas bort lämnar sina filer åt ett städjobb.
+- En användare tas aldrig bort på riktigt, bara märks som borttagen. Annars skulle delat innehåll raderas med personen.
+
+### Det som redan är rätt
+
+- Assistenter, appar, kunskap, skills och widgetar bär redan sitt space.
+- Eneo kan redan slå upp vilket space ett anrop rör, för API-nycklar som är låsta till ett space.
+- Lagringen räknar redan vilka filer som pekar på ett innehåll.
+
+## Så fungerar ett space i dag
+
+| Sak | Så är det |
+|---|---|
+| Slag av space | Personligt space (ett per person), organisationens space och vanliga delade space. Det finns ingen kolumn för slaget; det läses ut ur två andra kolumner. |
+| Medlemmar | Personer och grupper med rollen admin, redigerare eller läsare. Ett delat space har ingen ägare i datamodellen, och inget hindrar att sista administratören försvinner. |
+| Samtal | Privata för den som för dem, också i ett delat space. Insikter ger den som har den behörigheten en egen väg till dem. |
+| Delad kunskap | En läsregel över samma rad, i praktiken från organisationens space till de andra. Inget kopieras. |
+| Flytt | Bara assistenter och tjänster kan flyttas. Samtalen följer med, filerna gör det inte, och kunskapslänkar kontrolleras inte om. |
+| Ta bort ett space | En rak radering utan kontroll. Andra space som använder spacets kunskap tappar den tyst. |
+| Ta bort en person | Personen märks som borttagen, och det personliga spacet raderas. Allt i delade space står kvar. |
+
+## MFA på ett space
+
+Ett vanligt delat space kan kräva MFA. IdP:n äger MFA: Eneo kontrollerar aldrig koder, utan läser i den signerade biljetten, enligt organisationens regel, om inloggningen gjordes med MFA. Svaret är ja eller nej, och det sparas på sessionen när den skapas. Eneo räknar ingen ålder på det.
+
+Hur varje anrop prövas visar figuren [Kontrollen vid ingången](/mfa/#kontrollen-vid-ingangen) på sidan MFA i Eneo. Den som saknar MFA loggar in igen genom den vanliga inloggningen och får en ny session.
+
+### Varför så enkelt
+
+- Ett ja eller nej räcker. Hur ofta MFA görs avgör IdP:n, och Eneos session har redan ett slut.
+- En ny inloggning ger användaren samma resa som en uppgraderad session, med mycket mindre kod.
+- Det i biljetten som Eneo inte känner till ignoreras, som standarden kräver.
+
+### Så märker användaren det
+
+- Ett MFA-space syns i listan med ett lås.
+- Knappen "Logga in med MFA" leder till IdP:n och tillbaka till spacet.
+- Sedan arbetar man tills sessionen slutar, utan ny fråga, också under en lång inspelning.
+
+### Det som saknas i dag
+
+- Kontrollen frågar "vilket space rör anropet?".
+- För en fil finns inget svar i dag.
+- Det är därför ägandet måste rättas innan kravet kan gälla.
+
+## Filen får en hemvist
+
+I dag gör kopplingen till personen tre jobb på en gång. Målbilden håller isär dem som tre begrepp. Det är inte en ny modell som läggs över allt. Vem som får läsa en fil avgörs av det filen sitter på (samtalet, assistenten, körningen), och hemvisten lägger till spacets krav.
+
+<figure class="figur">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+        <svg viewBox="0 0 760 300" role="img" aria-label="En fil får fyra tydliga kopplingar: hemvist till ett space, åtkomst genom det den används i, ett spår till den som skapade den, och en pekare till det lagrade innehållet.">
+        <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <rect x="290" y="118" width="180" height="64" rx="10" style="fill:var(--surface)" stroke="currentColor" stroke-width="2"/>
+        <text x="380" y="146" font-size="14" text-anchor="middle" font-weight="600">Filen</text>
+        <text x="380" y="165" font-size="11.5" text-anchor="middle">samma id som i dag</text>
+        <rect x="540" y="24" width="204" height="60" rx="10" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <text x="642" y="50" font-size="13" text-anchor="middle" font-weight="600">Spacet</text>
+        <text x="642" y="68" font-size="11.5" text-anchor="middle">spacets krav gäller: MFA</text>
+        <line x1="470" y1="130" x2="548" y2="88" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#a3)"/>
+        <text x="512" y="98" font-size="12" font-weight="600" text-anchor="end" style="fill:var(--accent)">hemvist (nytt)</text>
+        <rect x="540" y="216" width="204" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="642" y="242" font-size="12" text-anchor="middle" font-weight="600">Samtal, assistent, app, körning</text>
+        <text x="642" y="260" font-size="11.5" text-anchor="middle">avgör vem som får läsa</text>
+        <line x1="470" y1="170" x2="548" y2="214" stroke="currentColor" stroke-width="1.5" marker-end="url(#a3)"/>
+        <text x="516" y="212" font-size="12" text-anchor="end">åtkomst (som i dag)</text>
+        <rect x="16" y="24" width="204" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="118" y="50" font-size="13" text-anchor="middle" font-weight="600">Person eller tjänst</text>
+        <text x="118" y="68" font-size="11.5" text-anchor="middle">en uppgift, ingen rättighet</text>
+        <line x1="290" y1="130" x2="212" y2="88" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#a3)"/>
+        <text x="262" y="104" font-size="12">spår: skapad av</text>
+        <rect x="16" y="216" width="204" height="60" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="118" y="242" font-size="13" text-anchor="middle" font-weight="600">Lagrat innehåll</text>
+        <text x="118" y="260" font-size="11.5" text-anchor="middle">räknar vilka filer som pekar hit</text>
+        <line x1="290" y1="170" x2="212" y2="214" stroke="currentColor" stroke-width="1.5" marker-end="url(#a3)"/>
+        <text x="262" y="206" font-size="12">pekar på</text>
+      </svg>
+</div>
+<figcaption>Målbilden. Regeln för läsning blir: innehållets egen åtkomstregel **och** hemvistens krav. Hemvisten vidgar aldrig vem som får läsa.</figcaption>
+</figure>
+
+<figure class="figur" id="sa-lases-en-fil">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+        <svg viewBox="0 0 760 320" role="img" aria-label="Så läses en fil. I dag hämtas innehållet med en länk som gäller för den som har den, och spacet frågas aldrig. I målbilden måste både innehållets egen åtkomstregel och hemvistens krav säga ja, och en länk prövas när den används.">
+        <defs><marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <rect x="16" y="16" width="352" height="288" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="32" y="42" font-size="13" font-weight="600">I dag</text>
+        <rect x="107" y="52" width="170" height="34" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="192" y="74" font-size="12.5" text-anchor="middle">Någon läser filen</text>
+        <line x1="176" y1="86" x2="124" y2="110" stroke="currentColor" stroke-width="1.5" marker-end="url(#a5)"/>
+        <line x1="208" y1="86" x2="260" y2="110" stroke="currentColor" stroke-width="1.5" marker-end="url(#a5)"/>
+        <rect x="32" y="112" width="152" height="46" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="108" y="132" font-size="12.5" font-weight="600" text-anchor="middle">Ägarkontroll</text>
+        <text x="108" y="149" font-size="11.5" text-anchor="middle">ger uppgifter och en länk</text>
+        <rect x="200" y="112" width="152" height="46" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="276" y="132" font-size="12.5" font-weight="600" text-anchor="middle">Länk</text>
+        <text x="276" y="149" font-size="11.5" text-anchor="middle">gäller den som har den</text>
+        <line x1="184" y1="135" x2="198" y2="135" stroke="currentColor" stroke-width="1.5" marker-end="url(#a5)"/>
+        <line x1="276" y1="158" x2="234" y2="188" stroke="currentColor" stroke-width="1.5" marker-end="url(#a5)"/>
+        <text x="222" y="180" font-size="11.5" text-anchor="end">prövar bara organisationen</text>
+        <rect x="117" y="192" width="150" height="38" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="2"/>
+        <text x="192" y="216" font-size="13" font-weight="600" text-anchor="middle">Filens innehåll</text>
+        <line x1="192" y1="230" x2="192" y2="258" style="stroke:var(--bad)" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="185" y1="237" x2="199" y2="251" style="stroke:var(--bad)" stroke-width="2"/>
+        <line x1="199" y1="237" x2="185" y2="251" style="stroke:var(--bad)" stroke-width="2"/>
+        <text x="210" y="248" font-size="12" style="fill:var(--bad)">spacet frågas aldrig</text>
+        <rect x="117" y="258" width="150" height="34" rx="8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4"/>
+        <text x="192" y="280" font-size="12" text-anchor="middle">Spacet kräver MFA</text>
+        <rect x="392" y="16" width="352" height="288" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="408" y="42" font-size="13" font-weight="600">Målbilden</text>
+        <rect x="483" y="52" width="170" height="34" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="568" y="74" font-size="12.5" text-anchor="middle">Någon läser filen</text>
+        <line x1="552" y1="86" x2="500" y2="110" stroke="currentColor" stroke-width="1.5" marker-end="url(#a5)"/>
+        <line x1="584" y1="86" x2="636" y2="110" stroke="currentColor" stroke-width="1.5" marker-end="url(#a5)"/>
+        <text x="568" y="106" font-size="12" font-weight="600" text-anchor="middle" style="fill:var(--accent)">och</text>
+        <rect x="408" y="112" width="152" height="46" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="484" y="132" font-size="12.5" font-weight="600" text-anchor="middle">Egen åtkomstregel</text>
+        <text x="484" y="149" font-size="11.5" text-anchor="middle">som i dag</text>
+        <rect x="576" y="112" width="152" height="46" rx="8" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <text x="652" y="132" font-size="12.5" font-weight="600" text-anchor="middle">Hemvistens krav</text>
+        <text x="652" y="149" font-size="11.5" text-anchor="middle">är MFA-kravet uppfyllt?</text>
+        <line x1="484" y1="158" x2="526" y2="188" stroke="currentColor" stroke-width="1.5" marker-end="url(#a5)"/>
+        <line x1="652" y1="158" x2="610" y2="188" stroke="currentColor" stroke-width="1.5" marker-end="url(#a5)"/>
+        <text x="496" y="184" font-size="11.5" text-anchor="end">ja</text>
+        <text x="640" y="184" font-size="11.5">ja</text>
+        <rect x="493" y="192" width="150" height="38" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="2"/>
+        <text x="568" y="216" font-size="13" font-weight="600" text-anchor="middle">Filen</text>
+        <rect x="408" y="250" width="320" height="44" rx="8" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <text x="568" y="268" font-size="12.5" font-weight="600" text-anchor="middle">En länk prövas när den används</text>
+        <text x="568" y="285" font-size="11.5" text-anchor="middle">en gammal länk slutar gälla när kravet slås på</text>
+      </svg>
+</div>
+<figcaption>Till vänster i dag: innehållet hämtas med en länk som gäller för den som har den, och spacets krav når aldrig filen. Till höger målbilden: båda måste säga ja, och filen läses med den egna inloggningen. En länk till en fil i ett space som kräver MFA slutar fungera, också en som skapades innan kravet slogs på.</figcaption>
+</figure>
+
+### En fils liv
+
+1. **Skapas**<br />En genererad fil, en dokumentversion eller en fil i ett flöde får hemvisten direkt. En uppladdning kan säga vilket space den ska till.
+2. **Utkast**<br />En uppladdning utan mål är ett utkast. Den städas bort efter 24 timmar om den inte används, som i dag.
+3. **Bifogas**<br />Filen får sin hemvist i samma steg som den bifogas. Två space kan inte båda ta samma fil, och hemvisten töms aldrig.
+4. **Läses**<br />Varje läsning prövas när den sker, också när en länk löses in eller ett verktyg läser filen.
+
+Hemvisten ändrar inte gallringen. Tiden räknas som i dag från samtalet eller körningen, och innehållet raderas först när ingen fil pekar på det.
+
+### En fil används bara i sitt eget space
+
+Regeln gäller i alla space, inte bara där MFA krävs. Ingen funktion bygger på att en fil delas mellan space, och ingen av våra klienter gör det i dag. En regel för alla space är enklare att förstå och underhålla än två lägen.
+
+Försöker någon bifoga en fil i ett annat space blir svaret ett tydligt nej. Den som vill ha filen där laddar upp den i det spacet.
+
+### Kunskap påverkas inte
+
+Samlingar, webbplatser som Eneo läser in och integrationer är inte filer. De hör redan till ett space, och när organisationens space delar kunskap till andra space är det en läsregel över samma rad, inte en kopia. Därför behöver kunskap ingen hemvist, och kunskap som delas in från organisationens space fungerar som i dag, också i ett space som kräver MFA. Kunskap som spacet själv äger är en annan sak. Den har inget skydd mot kravet än, så reglaget nekar så länge spacet har sådan kunskap. Det visar nästa avsnitt.
+
+## Att slå på MFA för ett space som redan finns
+
+Reglaget finns på varje vanligt delat space, men inte på organisationens space och inte på personliga space. Slår någon på det prövar Eneo först om allt i spacet är skyddat. Ett krav som bara når en del av innehållet skulle ge ett falskt lugn, så om något inte är skyddat svarar reglaget nej och säger varför, så att det går att åtgärda.
+
+<figure class="figur">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+        <svg viewBox="0 0 760 206" role="img" aria-label="När någon slår på MFA prövar Eneo spacet. Är allt skyddat är MFA på. Är något oskyddat blir svaret nej, med ett skäl som går att åtgärda, och sedan kan man slå på igen.">
+        <defs><marker id="a6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <rect x="16" y="56" width="140" height="48" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="86" y="76" font-size="13" font-weight="600" text-anchor="middle">Slå på MFA</text>
+        <text x="86" y="94" font-size="11.5" text-anchor="middle">reglaget på spacet</text>
+        <line x1="156" y1="80" x2="194" y2="80" stroke="currentColor" stroke-width="1.5" marker-end="url(#a6)"/>
+        <rect x="198" y="56" width="190" height="48" rx="8" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <text x="293" y="76" font-size="13" font-weight="600" text-anchor="middle">Eneo prövar spacet</text>
+        <text x="293" y="94" font-size="11.5" text-anchor="middle">är allt i spacet skyddat?</text>
+        <line x1="388" y1="70" x2="450" y2="42" stroke="currentColor" stroke-width="1.5" marker-end="url(#a6)"/>
+        <text x="406" y="48" font-size="11.5" text-anchor="middle">ja</text>
+        <rect x="454" y="16" width="290" height="44" rx="8" style="fill:var(--ok-soft);stroke:var(--ok)" stroke-width="1.5"/>
+        <text x="599" y="35" font-size="13" font-weight="600" text-anchor="middle">MFA är på</text>
+        <text x="599" y="52" font-size="11.5" text-anchor="middle">spacets krav gäller allt i spacet</text>
+        <line x1="388" y1="92" x2="450" y2="126" stroke="currentColor" stroke-width="1.5" marker-end="url(#a6)"/>
+        <text x="398" y="120" font-size="11.5" text-anchor="middle">nej</text>
+        <rect x="454" y="108" width="290" height="64" rx="8" style="fill:var(--warn-soft);stroke:var(--warn)" stroke-width="1.5"/>
+        <text x="599" y="128" font-size="13" font-weight="600" text-anchor="middle">Nej, med ett skäl</text>
+        <text x="599" y="146" font-size="11.5" text-anchor="middle">som går att åtgärda, till exempel en fil</text>
+        <text x="599" y="162" font-size="11.5" text-anchor="middle">som också används i ett annat space</text>
+        <path d="M599 172 V194 H86 V108" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#a6)"/>
+        <text x="342" y="188" font-size="11.5" text-anchor="middle">åtgärda och slå på igen</text>
+      </svg>
+</div>
+<figcaption>Är allt skyddat när reglaget slås på gäller kravet direkt. Ett nej kommer alltid med ett skäl, och när det är åtgärdat går det att slå på igen.</figcaption>
+</figure>
+
+| Innehåll i spacet | När kravet slås på | Läge |
+|---|---|---|
+| Spacet, assistenter (också de dolda som ett flöde skapar), samtal, prompter | Skyddas av kontrollen vid ingången | <Badge text="skyddas" variant="success" /> |
+| Filer och bilagor | Skyddas av filens hemvist. En länk till en fil i spacet slutar fungera, också en som skapades innan kravet slogs på. | <Badge text="skyddas" variant="success" /> |
+| Flöden med tal till text och deras filer | Skyddas när Flöden har tagit in ändringen | <Badge text="skyddas" variant="success" /> |
+| Verktyg som körs i Eneo | Kan vara på. Varje anrop prövas mot sessionen och spacets krav. | <Badge text="kan vara på" variant="success" /> |
+| Medföljande filverktyg som körs som en egen tjänst, och MCP-servrar som organisationen har lagt till | Kan vara på, men kan inte läsa spacets filer | <Badge text="begränsning" variant="default" /> |
+| Kunskap som spacet äger, appar, vanliga tjänster, gruppchattar, skills | Reglaget nekar tills de har fått sitt skydd | <Badge text="nej tills skydd finns" variant="caution" /> |
+| En befintlig fil som redan används i ett annat space | Reglaget säger vilken fil och vilket space | <Badge text="nej tills utrett" variant="caution" /> |
+| Widgetar | Reglaget nekar alltid. En besökare utifrån kan inte visa MFA. | <Badge text="nej, alltid" variant="danger" /> |
+| Kunskap som delas in från organisationens space | Fungerar som i dag | <Badge text="som i dag" variant="default" /> |
+
+Påslaget och varje ändring som påverkar villkoret tar samma lås på spacet. Efter påslaget nekas det som skulle bryta villkoret, till exempel att publicera en widget eller flytta ut en assistent. I takt med att fler slags innehåll får sitt skydd försvinner skälen.
+
+Slås kravet på medan någon redan arbetar i spacet får nästa anrop från en session utan MFA svaret "logga in med MFA". Hur det går för en pågående inspelning står i nästa avsnitt.
+
+## Tal till text följer spacet
+
+Modulen har inget eget space. Den loggar in genom Eneo och arbetar i de flöden personen har. Ligger flödet i ett MFA-space gäller kravet också i modulen.
+
+<figure class="figur">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+        <svg viewBox="0 0 760 250" role="img" aria-label="Modulen loggar in genom Eneo, flödet ligger i ett space som kräver MFA, och ljudet och transkriptet får spacet som hemvist. Loggar personen ut stoppas transkriberingen i molnet medan ljudet sparas lokalt.">
+        <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <rect x="16" y="40" width="150" height="74" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="91" y="66" font-size="13" text-anchor="middle" font-weight="600">Modulen</text>
+        <text x="91" y="84" font-size="11.5" text-anchor="middle">spelar in och</text>
+        <text x="91" y="99" font-size="11.5" text-anchor="middle">sparar ljudet lokalt</text>
+        <line x1="166" y1="77" x2="232" y2="77" stroke="currentColor" stroke-width="1.5" marker-end="url(#a4)"/>
+        <text x="199" y="68" font-size="11.5" text-anchor="middle">loggar in</text>
+        <rect x="236" y="40" width="160" height="74" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="316" y="66" font-size="13" text-anchor="middle" font-weight="600">Eneo-sessionen</text>
+        <text x="316" y="84" font-size="11.5" text-anchor="middle">MFA: ja eller nej,</text>
+        <text x="316" y="99" font-size="11.5" text-anchor="middle">från IdP:ns biljett</text>
+        <line x1="396" y1="77" x2="462" y2="77" stroke="currentColor" stroke-width="1.5" marker-end="url(#a4)"/>
+        <text x="429" y="68" font-size="11.5" text-anchor="middle">öppnar</text>
+        <rect x="466" y="20" width="278" height="150" rx="10" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <text x="482" y="44" font-size="13" font-weight="600">Space som kräver MFA</text>
+        <rect x="482" y="56" width="246" height="40" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="496" y="81" font-size="13">Flödet med tal till text</text>
+        <rect x="482" y="108" width="116" height="46" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="540" y="128" font-size="12.5" text-anchor="middle">Ljudet</text>
+        <text x="540" y="144" font-size="11" text-anchor="middle">hemvist: spacet</text>
+        <rect x="612" y="108" width="116" height="46" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="670" y="128" font-size="12.5" text-anchor="middle">Transkriptet</text>
+        <text x="670" y="144" font-size="11" text-anchor="middle">hemvist: spacet</text>
+        <line x1="316" y1="114" x2="316" y2="186" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#a4)"/>
+        <rect x="150" y="190" width="460" height="46" rx="8" style="fill:var(--warn-soft);stroke:var(--warn)" stroke-width="1.5"/>
+        <text x="380" y="209" font-size="12.5" text-anchor="middle" font-weight="600">Sessionen upphör under en inspelning</text>
+        <text x="380" y="226" font-size="11.5" text-anchor="middle">transkriberingen i molnet stoppas inom 35 sekunder; ljudet finns kvar lokalt</text>
+      </svg>
+</div>
+<figcaption>Tal till text i ett MFA-space. MFA begärs innan inspelningen börjar, aldrig under den. Uppspelning och nedladdning görs med den egna inloggningen, inte med en länk som vem som helst kan använda.</figcaption>
+</figure>
+
+### Modulen
+
+- Visar låsta space med knappen "Logga in med MFA".
+- Navigerar aldrig till IdP:n under en inspelning.
+- Nekas molnet fortsätter inspelningen lokalt, och personen laddar upp efter stopp.
+- Slås kravet på under en inspelning och sessionen saknar MFA, nekas uppladdningarna och den levande anslutningen stängs inom 35 sekunder, samma gräns som vid utloggning. Ljudet finns kvar lokalt. Har sessionen redan MFA fortsätter inspelningen.
+
+### Lucka i dag, oavsett MFA
+
+- Utloggning stänger inte modulens åtkomst.
+- En inspelning fortsätter efter utloggning.
+- Båda rättas i ett eget steg i ordningen nedan.
+
+### Att rätta i Flöden
+
+- Ett transkript som inte ryms sparas innan kopplingen till körningen finns.
+- Avbryts steget där kan filen stå utan koppling.
+- Utläst ur koden av två oberoende läsningar, inte återskapat.
+
+## Ordningen
+
+Ordningen för hela arbetet står på [Ta över arbetet](/). Inom space och ägande gäller: först eneo-test, med Flöden och tal till text men utan MFA. Därefter byggs sessionens MFA och filernas hemvist samtidigt i kärnan, eftersom de rör olika delar av koden. Sedan kommer kontrollen vid ingången, och sist Flöden och modulen. Flöden tar in samma migrering en gång. Reglaget hålls avstängt tills läsare, skrivare, ifyllnad och villkor är utrullade. Flöden finns bara i React, medan MFA och hemvisten byggs i både Svelte och React.
+
+1. <small>kärnan · migrering</small><br />**Sessionens MFA** ([#1422](https://github.com/eneo-ai/eneo/issues/1422), [#808](https://github.com/eneo-ai/eneo/issues/808))<br />Regeln för vad som räknas som MFA, ja eller nej vid inloggningen, och "Logga in med MFA". Byggs samtidigt som stegen 2–4. Steg 1 och steg 2 har var sin migrering, och develop tar en i taget.
+2. <small>kärnan · migrering</small><br />**Filen får en hemvist** ([#1423](https://github.com/eneo-ai/eneo/issues/1423))<br />Först kolumnen. Sedan anpassas borttagning av space och flytt av assistenter, så att de tar hand om filerna.
+3. <small>kärnan · ifyllnad</small><br />**Hemvist på nya och befintliga filer** ([#1424](https://github.com/eneo-ai/eneo/issues/1424))<br />Hemvisten sätts när en fil skapas eller bifogas. Befintliga filer får sin ett space i taget, i omgångar som kan startas om. Alla id:n behålls. Det som inte går att reda ut listas.
+4. <small>kärnan · Svelte · React</small><br />**Filer läses med inloggningen** ([#810](https://github.com/eneo-ai/eneo/issues/810))<br />En ny väg i kärnan, där rätten kommer från det filen sitter på. Klienterna byter till den. En länk till en fil vars space kräver MFA nekas. I dag finns bara länkar. Kan påbörjas samtidigt med steg 1, men blir klar först när steg 1 har landat, eftersom den läser MFA på sessionen och kravet på spacet.
+5. <small>kärnan · Svelte · React</small><br />**Kontrollen vid ingången och reglaget** ([#809](https://github.com/eneo-ai/eneo/issues/809))<br />Ett uppslag för vilket space ett anrop rör, listor med lås, och reglaget med sitt villkor. Väntar på stegen 1–4.
+6. <small>kärnan · Flöden</small><br />**Utloggning stänger modulens åtkomst och den levande transkriberingen** ([#812](https://github.com/eneo-ai/eneo/issues/812))<br />En lucka i dag, oavsett MFA. Kan byggas när som helst, men före steg 7.
+7. <small>Flöden</small><br />**Flöden följer spacets MFA** ([#813](https://github.com/eneo-ai/eneo/issues/813))<br />Flödets dörrar prövar kravet, och filer som skapas för ett flöde får hemvist. Väntar på stegen 5 och 6.
+8. <small>kitet · modulen</small><br />**Tal till text hela vägen** ([modulen #6](https://github.com/eneo-ai/eneo-mod-speech-to-text/issues/6))<br />Låsta space, inloggning med MFA före inspelningen och skyddad uppspelning. Sist ett prov mot en riktig IdP.
+
+## Det som väntar, och det som inte byggs
+
+### Senare, på samma spår
+
+- Skydd för kunskap som spacet äger, och för appar, vanliga tjänster, gruppchattar och skills, i ett space som kräver MFA.
+- Filläsning för de medföljande filverktygen i ett sådant space.
+- Uppdelning av filer som redan används i flera space.
+- Flytt av fler slags innehåll än assistenter och tjänster.
+
+### Byggs inte nu
+
+- Ingen allmän ny åtkomstmodell.
+- Ingen egen hemvistlogik för Flöden. Samma regel och samma kolumn.
+
+### Användare inaktiveras
+
+- En användare tas inte bort utan inaktiveras. Det är avsiktligt: innehållet i delade space ska stå kvar.
+- Med hemvisten hör filerna till spacet, så de hänger inte på personen.
+
+## Var arbetet står, och det som inte är verifierat
+
+En del av steg 1, sessionens MFA, finns: regeln för vad som räknas som MFA och behörigheten att hantera den, på en gren som inte är granskad. Bygget är pausat. Resten av ordningen är inte byggt än.
+
+**Läget:** ombyggnaden på den här sidan (filens hemvist, spacets ägande av filer och MFA per space) är en stor ändring och startas inte nu. Arbetet med tal till text och gallring går före och klarar sig utan den. Det enda som byggs intill är ett litet steg i Flöden: en fil som skapas för ett flöde får veta vilket space och flöde den hör till, och en fil som en körning skapar också vilken körning, så att gallringen hittar rätt filer. Det steget ändrar varken vem som äger en fil eller vem som får läsa den.
+
+### Inte verifierat
+
+- Hur många befintliga filer som används i mer än ett space i verkliga data.
+- Samtidighet, avbrott och migrering är inte körda. Allt är läst i koden.
+
+## Hör ihop med
+
+- [Ta över arbetet](/): läget, ordningen och länkar till allt annat
+- [Vägen till produktion](/vagen-till-produktion/)
+- [MFA i Eneo](/mfa/)
+- [MFA med OneGate: vem gör vad](/onegate/)
+- [MFA på space på GitHub (#804)](https://github.com/eneo-ai/eneo/issues/804): uppgifterna i den ordning de byggs, med skisser
+
+---
+
+Källor: fem kartläggningar av koden i kärnan och Flöden 12 november, designen för ägande och dess två granskningar och planen för MFA:s första leverans.

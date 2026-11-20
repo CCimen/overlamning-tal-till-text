@@ -1,0 +1,10 @@
+{
+	"page.draft": "Det här innehållet är ett utkast och kommer inte med i den byggda sidan.",
+	"aside.note": "Notera",
+	"aside.tip": "Tips",
+	"aside.caution": "Varning",
+	"aside.danger": "Fara",
+	"fileTree.directory": "Mapp",
+	"builtWithStarlight.label": "Byggd med Starlight",
+	"heading.anchorLabel": "Avsnittet ”{{title}}”"
+}

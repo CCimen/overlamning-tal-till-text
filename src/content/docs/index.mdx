@@ -1,0 +1,230 @@
+---
+title: Ta över arbetet
+description: Läget, ordningen och det som väntar på beslut, för den som tar över arbetet med tal till text i produktion.
+---
+
+import { Badge } from '@astrojs/starlight/components';
+import lage from '../../data/lage.json';
+
+export const lankar = {
+	'Första leveransen till eneo-test': '/forsta-leveransen/',
+	MFA: '/mfa/',
+	'Filernas hemvist': '/space-och-agande/',
+	'Gallring i övrigt': '/gallring/',
+	'Kit och modul': '#modulen-kitet-och-talaridentifieringen',
+	'Nyckel och dokumentation': '/vagen-till-produktion/#arbetet-steg-för-steg',
+	'Flöden och slutet': '/vagen-till-produktion/#var-det-byggs-och-hur-det-når-produktion',
+};
+export const forst = lage.beslut.filter((b) => b.prioritet <= 1);
+export const sedan = lage.beslut.filter((b) => b.prioritet > 1);
+export const andel = (k) => `${Math.round((100 * k.klara) / k.totalt)}%`;
+export const hamtad = new Date(lage.hamtad).toLocaleString('sv-SE', {
+	timeZone: 'Europe/Stockholm',
+	dateStyle: 'long',
+	timeStyle: 'short',
+});
+export const fler = lage.pagar.length - 1;
+export const nasta = lage.kedjor.find((k) => !k.pausad && k.nasta)?.nasta;
+// Uppgifterna under en epic på GitHub, ur exporten: antal och hur många som är stängda.
+export const uppgifter = (epic) => {
+	const a = lage.github[epic] ?? [];
+	const s = a.filter((x) => x.tillstand.startsWith('stängt')).length;
+	return `${a.length} ${a.length === 1 ? 'uppgift' : 'uppgifter'}, ${s} ${s === 1 ? 'stängd' : 'stängda'}`;
+};
+
+Den 26 november tar du över arbetet med tal till text i produktion. Två leveranser återstår: först eneo-test, sedan produktion. Här står läget, ordningen och det som väntar på beslut. Varje del har en egen sida i menyn.
+
+<div class="laget not-content">
+	<dl>
+		<div>
+			<dt>Pågår ({lage.pagar.length}):</dt>
+			<dd>{lage.pagar.length === 0 ? 'inget just nu' : <><a href="#pågår">{lage.pagar[0].rubrik}</a>{fler > 0 && `, och ${fler} till`}</>}</dd>
+		</div>
+		{nasta && (
+			<div>
+				<dt>Nästa att starta:</dt>
+				<dd><a href="#spåren">{nasta}</a></dd>
+			</div>
+		)}
+		{lage.kedjor.some((k) => k.pausad) && (
+			<div>
+				<dt>Pausat:</dt>
+				<dd>Produktionen (space, ägande och MFA)</dd>
+			</div>
+		)}
+	</dl>
+	<p class="laget-tid">Läget <time datetime={lage.hamtad}>{hamtad}</time></p>
+</div>
+
+<figure class="sparbild not-content" aria-labelledby="sa-hanger-arbetet-ihop">
+	<figcaption id="sa-hanger-arbetet-ihop">Så hänger arbetet ihop</figcaption>
+	<div class="spar">
+		<p class="spar-namn">develop, för alla</p>
+		<ul class="spar-steg fria">
+			<li><a href="/vagen-till-produktion/#varför-det-byggs-i-kärnan">Kärnan i develop: inloggning, filer, gallringsmotorn</a></li>
+			<li><a href="/vagen-till-produktion/#version-24-och-eneo-test">Version 2.4: widgets och React, utan Flöden</a> <Badge text="Mål" variant="note" size="small" /></li>
+		</ul>
+	</div>
+	<p class="spar-synk">↓ develop synkas in i Flödes-grenen efter varje landning</p>
+	<div class="spar nu">
+		<p class="spar-namn">Nu: eneo-test</p>
+		<ol class="spar-steg">
+			<li><a href="/gallring/">Gallringen i Flöden</a></li>
+			<li><a href="/forsta-leveransen/#steg-prov">Provet genom modulen, talaridentifieringen (vemsa) och transkriberingen (vadsa)</a></li>
+			<li><a href="/forsta-leveransen/">Eneo-test: låst avbild från Flödes-grenen, utan MFA</a> <Badge text="Mål" variant="note" size="small" /></li>
+		</ol>
+	</div>
+	<p class="spar-synk">↓ efter eneo-test</p>
+	<div class="spar">
+		<p class="spar-namn">Sedan: produktion (pausat)</p>
+		<ol class="spar-steg">
+			<li><a href="/space-och-agande/#ordningen">Space, ägande</a> och <a href="/mfa/">MFA</a>, med <a href="/onegate/">inställningen i OneGate</a></li>
+			<li><a href="/vagen-till-produktion/#när-är-vi-klara">Slutprov på vald version</a> <Badge text="Mål" variant="note" size="small" /></li>
+		</ol>
+		<p class="spar-not">Vägen dit är inte vald: en låst avbild direkt till slutprovet, eller en release där Flöden först slås in i develop.</p>
+	</div>
+</figure>
+
+Version 2.4 ges ut från develop, med React och widgets men utan Flöden. Det som har landat i develop när avbilden låses finns också i eneo-test; [mer om version 2.4](/vagen-till-produktion/#version-24-och-eneo-test).
+
+Eneo-test kör i dag 2.3.2. Space, ägande och MFA byggs efter eneo-test; med ägandet hör filerna till sitt space, så att inget hänger på en enskild person, och när Flöden kommer med i en release är inte bestämt.
+
+**Gallringen i Flöden är planerad, inte byggd.** I dag tar Flöden inte bort något av sig själv, och spacet är inget tak. Före eneo-test byggs en tid per organisation, space, flöde och steg med spacet som tak, ett val att ta bort ljudet när körningen eller det sista steget som behöver ljudet är klart, och städning av rester. Inget gallras förrän någon har valt en tid.
+
+## Nuläge
+
+<p>
+	Läget uppdaterades <time datetime={lage.hamtad}>{hamtad}</time>.
+</p>
+
+### Spåren
+
+Nästa i ordningen står först under [Gör i den här ordningen](#gör-i-den-här-ordningen); listan visar vad som kan startas i varje spår.
+
+<ul class="kedjor not-content">
+	{lage.kedjor.map((k) => (
+		<li class={k.pausad ? 'pausad' : undefined}>
+			<span class="kedja-namn">{lankar[k.namn] ? <a href={lankar[k.namn]}>{k.namn}</a> : k.namn}</span>
+			<span class="kedja-stapel" aria-hidden="true"><span style={{ width: andel(k) }}></span></span>
+			<span class="kedja-text">
+				{k.klara} av {k.totalt} klara.{' '}
+				{k.pausad
+					? <>Pausat: {k.pausad}.</>
+					: k.nasta
+						? <>Nästa att starta: {k.nasta}.</>
+						: k.klara === k.totalt
+							? 'Spåret är klart.'
+							: 'Inget steg kan starta just nu.'}
+			</span>
+		</li>
+	))}
+</ul>
+
+Spåret Första leveransen räknar också synkarna, kontraktet med modulen och talaridentifieringens delar, därför är det fler än stegen på sidan [Första leveransen till eneo-test](/forsta-leveransen/).
+
+Epics och uppgifter på GitHub: [På GitHub](#på-github).
+
+### Pågår
+
+<ul class="pagar">
+	{lage.pagar.map((p) => (
+		<li>
+			<strong>{p.rubrik}</strong>
+			<span>{p.lage}</span>
+			<span>Väntar på: {p.vantar || '–'}</span>
+		</li>
+	))}
+</ul>
+
+### Beslut som väntar
+
+Före eneo-test eller överlämningen:
+
+<div class="beslut">
+	{forst.map((b) => (
+		<details>
+			<summary>{b.rubrik}</summary>
+			<p>{b.text}</p>
+		</details>
+	))}
+</div>
+
+Före produktion:
+
+<div class="beslut">
+	<details>
+		<summary>Avbild eller release?</summary>
+		<p>Produktionen kan köra en låst avbild från Flödes-grenen eller en release med Flöden i develop. Det behövs inte före eneo-test.</p>
+	</details>
+</div>
+
+{sedan.length > 0 && (
+	<details class="beslut-fler">
+		<summary>Övriga beslut ({sedan.length})</summary>
+		<ul>
+			{sedan.map((b) => (
+				<li><strong>{b.rubrik}{/[.?!]$/.test(b.rubrik) ? '' : '.'}</strong> {b.text}</li>
+			))}
+		</ul>
+	</details>
+)}
+
+Frågorna om eneo-test och vägen till produktion avgörs av den som leder arbetet; inställningen i OneGate lämnas av IdP- och IDM-gruppen.
+
+## Gör i den här ordningen
+
+Det här är nästa steg i kortform. Hela ordningen före eneo-test står på [Första leveransen](/forsta-leveransen/#tidpunkt-1-före-den-första-databasen), och ordningen efter eneo-test på [Space och ägande](/space-och-agande/#ordningen).
+
+Från 26 november tas arbetet över. Det här räcker för att komma igång utan att ha följt det dag för dag. [Nuläge](#nuläge) ovan skrivs ur ärendelistan varje gång något landar eller beslutas.
+
+1. **[Nästa synk](/vagen-till-produktion/#var-det-byggs-och-hur-det-når-produktion).** Develop slås in i Flödes-grenen efter varje landning i kärnan. Senast landade [#1467](https://github.com/eneo-ai/eneo/pull/1467); nästa tar med bland annat rättningen av appkörningar som fastnar i kön ([#1469](https://github.com/eneo-ai/eneo/pull/1469)).
+2. **[Filens ursprung](/forsta-leveransen/#steg-1-5).** Det är byggt i två delar; var granskningen står syns under [Pågår](#pågår). Mät samtidigt en riktig körning på samma kod.
+3. **[Gallringen i Flöden](/gallring/), i kärnans motor, ett steg i taget.** Tid per organisation, space och flöde, i två halvor: först byts regeln säkert, sedan kommer förhandsräkningen över alla berörda körningar, bekräftelsen och borttagningen. Därefter rester, ljudet och steget.
+4. **Samtidigt: [modulen och taltjänsterna](#modulen-kitet-och-talaridentifieringen).** Kärnans besked för borttaget innehåll, helt eller delvis, bestäms tidigt, före bygget av ljudet. Modulen, talaridentifieringen (vemsa) och transkriberingen (vadsa) följer det. Ett befintligt fel i talaridentifieringen rättas och ges ut först; var det står syns under [Pågår](#pågår).
+5. **[Provet genom modulen](/forsta-leveransen/#steg-prov).** Ett märkt möte går genom modulen, Eneo, talaridentifieringen och transkriberingen. Ljud och transkript ska vara borta i varje kopia, också efter en avbruten process, medan dokumentet står kvar enligt sin regel.
+6. **[Resten av Flöden, i ordning](/forsta-leveransen/#tidpunkt-1-före-den-första-databasen).** Nyckelunderhållet kör igen, efter att policysidan för API-nycklar säger vad inställningen gör med befintliga nycklar; spacets roller styr flödet, sparade format får versioner, vanlig chatt behåller develops kapacitet, byggchattens bindning överlever samtalet, och sist kommer en ren migrationsgrund. Det som måste vara klart före avbilden står vid [steg 1.10](/forsta-leveransen/#steg-1-10).
+7. **[Eneo-test](/forsta-leveransen/#steg-1-11).** Rätta först det som kan stoppa uppgraderingen; villkoren före låsningen står vid [steg 1.10](/forsta-leveransen/#steg-1-10). Lås sedan avbilden. Prova uppgraderingen på en återställd kopia av eneo-tests databas, först med Flöden av. Gör driften klar, uppgradera och prova på plats.
+8. **[Efter eneo-test](/space-och-agande/#ordningen).** Space, ägande och MFA, i ordningen på space-sidan. Modulen går över till kitet, och blir vägen en release slås Flöden in i develop. Sist slutprovet för produktion.
+
+## Gör inte
+
+- Starta inte MFA eller ombyggnaden av space och ägande förrän start är beslutad. Det som finns lokalt för sessionens MFA är byggt men inte granskat.
+- Slå inte in Flöden i develop, och gör ingen release med Flöden. Eneo-test får en avbild.
+- Slå inte på gallring utan ett aktivt val, och låt ingen migrering slå på något av sig själv.
+- Ändra inte en gallringstid utan att se vad den tar bort: en ny eller kortare tid tar också bort äldre innehåll som redan finns.
+- Bygg ingen egen gallrings- eller MFA-logik i Flöden eller i modulen. Regeln och motorn finns i kärnan.
+- Ändra aldrig en migrering som redan har körts mot en databas som ska bevaras.
+- Beskriv inte felet i talaridentifieringen i ärenden, PR:er eller commits förrän rättningen är utgiven. Lägg inte ärendelistan i det öppna kodförrådet.
+- Ta inte in den stora PR:en med insikter i web-next ([#1468](https://github.com/eneo-ai/eneo/pull/1468)) förrän den är granskad mot gallringen och provet genom modulen.
+- Lägg ingen tid på sidospår, som demomiljön eller modulens designsystem, så länge gallringen och uppgraderingen är kvar.
+
+## Det som gäller
+
+- Flöden finns bara i React. MFA och filernas hemvist byggs i både Svelte och React.
+- Gallrat betyder oläsbart direkt och borttaget på riktigt, också i kopior och loggar. Återställs en säkerhetskopia körs gallringen ikapp innan trafiken öppnas. Det som tagits bort för hand, eller enligt en regel som ändrats efter säkerhetskopian, kan komma tillbaka.
+- Ljudet kan tas bort direkt när körningen är klar, efter valda timmar, eller så snart det sista steget som behöver ljudet är klart. Utan ett val följer ljudet körningens tid.
+- MFA följer OpenID Connect och fungerar med varje IdP som uppfyller kontraktet, utan särfall.
+
+## Modulen, kitet och talaridentifieringen
+
+Modulen för tal till text är ute i version 0.1.31. Den provades mot en kärna från tom databas, men kärnan var byggd lokalt, utan HTTPS, med låtsad transkribering och bara i Chromium. Modulkitet har fått två ändringar sedan sin första utgåva men ingen ny utgåva än. En av dem är brytande: sidan för inloggningsfönstret ska ligga utanför modulens egen inloggningskontroll, och uppgraderingssteget står i kitets ändringslogg. Talaridentifieringen är ute i version 0.2.0. Generiska ändringar i modulen förs också in i kitet. Näst på tur:
+
+- **Talaridentifieringen:** ett befintligt fel rättas och ges ut först; var det står syns under [Pågår](#pågår). Därefter kommer läsningen av resultatet i ett steg och loggar utan innehåll, och sist borttagningen på begäran, som kärnan kvitterar.
+- **Kitet:** provet av inloggningsfönstret körs också i Firefox. Sedan vart man hamnar efter en misslyckad eller sen inloggning, en logg som säger vilket steg i inloggningen som misslyckades, och en guide för att koppla en modul till en riktig Eneo.
+- **Modulen:** det webbläsaren sparar om en körning glöms när Eneo säger att den är borttagen, platsen för en uppladdning tas innan filen skickas.
+
+Modulen ges ut med en tagg först när CI är grön på mergen och samma avbild är provad mot en riktig kärna.
+
+## Var underlaget finns, och hur en ändring landar
+
+PR:erna och CI finns på GitHub. Allt annat finns i den lokala arbetsmappen: planen med leveranserna och när var och en är klar, förslagen, granskningarnas domar, kartor över koden, uppdragen för varje leverans, lägesnoten och ärendelistan. En ändring landar så här: test först, granskning före push, granskningsboten på PR:en, en körning i egen miljö och sist kön till develop. Flödes-grenen och modulen har ingen merge-kö; där mergas en PR när samma kontroller är gjorda.
+
+### På GitHub
+
+| Epic | Vad den samlar | Uppgifter | Sidan |
+|---|---|---|---|
+| [#1425](https://github.com/eneo-ai/eneo/issues/1425) Gallring av körningar, steg och inspelningar | Det som är kvar av gallringen i Flöden | {uppgifter('1425')} | [Gallring](/gallring/#underärenden-på-github) |
+| [#804](https://github.com/eneo-ai/eneo/issues/804) MFA för delade space, med tal till text | MFA, filernas hemvist och OneGate (uppgiften [#807](https://github.com/eneo-ai/eneo/issues/807)) | {uppgifter('804')} | [MFA i Eneo](/mfa/#underärenden-på-github) |
+| [#845](https://github.com/eneo-ai/eneo/issues/845) Inbäddade widgets | En del av version 2.4 | Se uppgifterna i [#845](https://github.com/eneo-ai/eneo/issues/845) | – |
+
+Gallringens steg före eneo-test har uppgifter under #1425. De andra stegen före eneo-test följs i ärendelistan och visas under [Spåren](#spåren) och på [Första leveransen](/forsta-leveransen/).

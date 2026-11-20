@@ -1,0 +1,402 @@
+---
+title: MFA i Eneo
+description: "Hur vi tänker om MFA i Eneo: vad som ska fungera, varför vi valde den enkla modellen, vad vi valde bort, och vad som krävs för att börja prova internt."
+tableOfContents:
+  maxHeadingLevel: 2
+---
+
+import { Badge } from '@astrojs/starlight/components';
+import Underarenden from '../../components/Underarenden.astro';
+
+<p><small>Eneo · MFA</small></p>
+
+Hur vi tänker om MFA i Eneo: vad som ska fungera, varför vi valde den enkla modellen, vad vi valde bort, och vad som krävs för att börja prova internt.
+
+<Badge text="inte byggt än" variant="caution" /> Inget av MFA är i drift eller kört. Första leveransen till eneo-test, med Flöden och tal till text, är utan MFA.
+
+:::note
+**Pausat, och ingår inte i eneo-test.** Space, ägande och MFA byggs efter eneo-test, före produktion. Sessionens MFA är påbörjad men inte granskad.
+:::
+
+## Kort sagt
+
+1. **Ett vanligt delat space kan kräva MFA,** också ett som redan finns. Det är hela inställningen. Flöden, filer och modulen för tal till text följer spacet.
+2. **IdP:n äger MFA.** IdP:n (identity provider) är tjänsten som loggar in personen, oavsett om organisationen kör den själv eller köper den. Eneo kontrollerar aldrig koder eller metoder. Eneo läser i den signerade biljetten om inloggningen gjordes med MFA: ja eller nej.
+3. **Svaret sätts när sessionen skapas** och gäller tills sessionen slutar. Det har ingen egen ålder.
+4. **Den som saknar MFA loggar in igen** genom den vanliga inloggningen, får en ny session och kommer tillbaka till spacet. En session går aldrig från nej till ja. Ingen behöver verifiera sig under en inspelning eller för en nedladdning.
+5. **Allt följer OpenID Connect.** Ingen kod skrivs för en viss IdP. Organisationen ställer in vilket värde som betyder MFA.
+
+<div class="tree" role="figure" aria-label="Spacet kräver MFA, och det är det enda stället där kravet ställs in. Flöden, filer och tal till text-modulen följer spacet. Filerna gör det genom sin hemvist. Inget av det är byggt än.">
+  <div class="node"><strong>Spacet kräver MFA</strong><span class="why">ett reglage per space, det enda stället där kravet ställs in</span><Badge text="Inte byggt än" variant="default" /></div>
+  <div class="kids">
+    <div class="node"><strong>Flöden</strong><span class="eff">följer spacet</span><span class="why">körningar, listor, uppladdning och live</span></div>
+    <div class="node"><strong>Filer</strong><span class="eff">följer spacet</span><span class="why">genom filens hemvist</span></div>
+    <div class="node"><strong>Tal till text-modulen</strong><span class="eff">följer spacet</span><span class="why">det space som flödet ligger i</span></div>
+  </div>
+</div>
+
+## Vad MFA på ett space skyddar mot
+
+Ett lösenord kan komma på avvägar. Med MFA räcker det inte att ha lösenordet: den som loggar in måste också ha en andra faktor, till exempel en kod i en app.
+
+<figure class="figur">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+<svg viewBox="0 0 760 250" role="img" aria-label="Två personer vid dörren till ett space som kräver MFA. Den som bara har kommit över lösenordet stoppas, eftersom den andra faktorn saknas. Personen själv har lösenordet och den andra faktorn och släpps in.">
+        <defs><marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <rect x="516" y="16" width="228" height="218" rx="10" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <rect x="532" y="33" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M535 33 V29.5 a3.5 3.5 0 0 1 7 0 V33" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="552" y="43" font-size="13" font-weight="600">Space som kräver MFA</text>
+        <rect x="532" y="58" width="196" height="34" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="546" y="80" font-size="12.5">Samtal och assistenter</text>
+        <rect x="532" y="104" width="196" height="34" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="546" y="126" font-size="12.5">Flöden och körningar</text>
+        <rect x="532" y="150" width="196" height="34" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="546" y="172" font-size="12.5">Tal till text-modulen</text>
+        <circle cx="40" cy="60" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M22 98 Q22 76 40 76 Q58 76 58 98 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="74" y="70" font-size="13" font-weight="600">Har kommit över lösenordet</text>
+        <rect x="74" y="80" width="74" height="22" rx="11" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="111" y="95" font-size="11.5" text-anchor="middle">lösenord</text>
+        <line x1="286" y1="86" x2="466" y2="86" style="stroke:var(--bad)" stroke-width="1.5"/>
+        <line x1="470" y1="78" x2="486" y2="94" style="stroke:var(--bad)" stroke-width="2"/>
+        <line x1="486" y1="78" x2="470" y2="94" style="stroke:var(--bad)" stroke-width="2"/>
+        <text x="376" y="76" font-size="12" text-anchor="middle" style="fill:var(--bad)">stoppas: andra faktorn saknas</text>
+        <circle cx="40" cy="170" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M22 208 Q22 186 40 186 Q58 186 58 208 Z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="74" y="180" font-size="13" font-weight="600">Personen själv</text>
+        <rect x="74" y="190" width="74" height="22" rx="11" style="fill:var(--surface)" stroke="currentColor" stroke-width="1"/>
+        <text x="111" y="205" font-size="11.5" text-anchor="middle">lösenord</text>
+        <rect x="156" y="190" width="100" height="22" rx="11" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1"/>
+        <text x="206" y="205" font-size="11.5" text-anchor="middle">andra faktorn</text>
+        <line x1="286" y1="196" x2="510" y2="196" style="stroke:var(--ok)" stroke-width="1.5" marker-end="url(#m1)"/>
+        <text x="398" y="186" font-size="12" text-anchor="middle" style="fill:var(--ok)">släpps in</text>
+      </svg>
+</div>
+<figcaption>Det är vad MFA på ett space skyddar mot: någon som har fått tag i ett lösenord men inte den andra faktorn. Vilka metoder som räknas som andra faktor avgörs hos IdP:n.</figcaption>
+</figure>
+
+## Så resonerar vi
+
+Utgångspunkten är hur en organisation faktiskt arbetar. MFA på känsligt innehåll används sällan, och ingen har tid att ställa in krav per fil eller flöde. En enkel regel som alla förstår skyddar bättre än många reglage som ingen håller ordning på.
+
+| Val | Varför |
+|---|---|
+| IdP:n avgör vad som är MFA | Den vet redan hur personen loggade in. Skulle Eneo tolka metoder (BankID, Freja, app-kod, SMS) måste Eneo underhålla en egen lista per IdP. Nu jämför Eneo ett värde. |
+| Ja eller nej, inget mer | Eneo behöver inte veta vilken metod som användes eller när. Gör organisationen fel i sin IdP är det IdP:ns inställning som rättas, inte Eneo. |
+| Bara space | Ett space är den delade ytan. Kräver spacet MFA är allt i det skyddat, och det som ligger utanför är det inte. Val per flöde, fil eller nedladdning ger ett administrationsgränssnitt som höjer tröskeln och skapar frågor som "varför svarar inte den här?". |
+| Är man inne är det löst | Ingen tjänst frågar efter ny inloggning för att ladda ner en fil. Under en lång inspelning vore det dessutom ett sätt att tappa ljud. |
+| Ingen ålder på MFA | Hur ofta MFA görs avgör IdP:n. Eneos session har redan ett slut. |
+| Standarden, inget särfall | Byter organisationen IdP ändras en inställning, inte koden. |
+
+## Så hänger det ihop
+
+<figure class="figur">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+<svg viewBox="0 0 760 200" role="img" aria-label="Kedjan från IdP:n till spacet. IdP:n loggar in personen och avgör vad som räknas som MFA. Biljetten är en signerad id-token som bär värdet, helst i acr. Eneo jämför värdet och sparar ja eller nej på sessionen. Spacet prövar varje anrop vid ingången.">
+        <defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <text x="86" y="22" font-size="11.5" text-anchor="middle">hos IdP:n</text>
+        <line x1="16" y1="29" x2="156" y2="29" stroke="currentColor" stroke-width="1"/>
+        <text x="576" y="22" font-size="11.5" text-anchor="middle">i Eneo</text>
+        <line x1="408" y1="29" x2="744" y2="29" stroke="currentColor" stroke-width="1"/>
+        <rect x="16" y="40" width="140" height="72" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="86" y="68" font-size="13" font-weight="600" text-anchor="middle">IdP:n</text>
+        <text x="86" y="88" font-size="11.5" text-anchor="middle">loggar in personen</text>
+        <line x1="156" y1="76" x2="208" y2="76" stroke="currentColor" stroke-width="1.5" marker-end="url(#m2)"/>
+        <text x="184" y="68" font-size="11.5" text-anchor="middle">skickar</text>
+        <rect x="212" y="40" width="140" height="72" rx="10" style="fill:var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="282" y="62" font-size="13" font-weight="600" text-anchor="middle">Biljetten</text>
+        <text x="282" y="78" font-size="11.5" text-anchor="middle">signerad id-token</text>
+        <rect x="224" y="86" width="116" height="18" rx="4" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.2"/>
+        <text x="282" y="99" font-size="11" text-anchor="middle" style="font-family:var(--mono)">acr = …/loa/mfa</text>
+        <line x1="352" y1="76" x2="404" y2="76" stroke="currentColor" stroke-width="1.5" marker-end="url(#m2)"/>
+        <text x="380" y="68" font-size="11.5" text-anchor="middle">jämförs</text>
+        <rect x="408" y="40" width="140" height="72" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="478" y="68" font-size="13" font-weight="600" text-anchor="middle">Sessionen</text>
+        <text x="478" y="88" font-size="12" text-anchor="middle">MFA: ja eller nej</text>
+        <line x1="548" y1="76" x2="600" y2="76" stroke="currentColor" stroke-width="1.5" marker-end="url(#m2)"/>
+        <text x="576" y="68" font-size="11.5" text-anchor="middle">prövas</text>
+        <rect x="604" y="40" width="140" height="72" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="674" y="64" font-size="13" font-weight="600" text-anchor="middle">Spacet</text>
+        <text x="674" y="84" font-size="11.5" text-anchor="middle">släpp in, eller</text>
+        <text x="674" y="99" font-size="11.5" text-anchor="middle">be om MFA</text>
+        <line x1="16" y1="126" x2="744" y2="126" stroke="currentColor" stroke-width="1" stroke-dasharray="2 4"/>
+        <g font-size="11.5">
+          <text x="16" y="148">lösenord och andra faktor</text>
+          <text x="16" y="166">vilka metoder som räknas</text>
+          <text x="16" y="184">hur ofta MFA görs</text>
+          <text x="212" y="148">vem personen är</text>
+          <text x="212" y="166">värdet som betyder MFA</text>
+          <text x="212" y="184">helst i acr, annars amr</text>
+          <text x="408" y="148">jämför med inställningen</text>
+          <text x="408" y="166">sparar ja eller nej</text>
+          <text x="408" y="184">gäller tills sessionen slutar</text>
+          <text x="604" y="148">varje anrop prövas</text>
+          <text x="604" y="166">i webben och i modulen</text>
+          <text x="604" y="184">nycklar får ett avslag</text>
+        </g>
+      </svg>
+</div>
+<figcaption>IdP:n avgör om inloggningen var MFA och skriver det i den signerade biljetten. Eneo kontrollerar aldrig koder, utan jämför värdet med organisationens inställning och sparar ja eller nej på sessionen tills den slutar. Under varje led står vad det ansvarar för.</figcaption>
+</figure>
+
+<figure class="figur" id="kontrollen-vid-ingangen">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+<svg viewBox="0 0 760 230" role="img" aria-label="Varje anrop utifrån prövas vid ingången: vilket space rör anropet, kräver spacet MFA, och har sessionen MFA. Saknar sessionen MFA får klienten svaret logga in med MFA, och ett anrop utan person bakom får ett tydligt avslag.">
+        <defs><marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <rect x="16" y="76" width="120" height="52" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="76" y="98" font-size="13" text-anchor="middle" font-weight="600">Anrop</text>
+        <text x="76" y="115" font-size="11.5" text-anchor="middle">webb, modul, nyckel</text>
+        <line x1="136" y1="102" x2="166" y2="102" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+        <rect x="170" y="76" width="150" height="52" rx="8" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <text x="245" y="98" font-size="13" text-anchor="middle" font-weight="600">Vilket space?</text>
+        <text x="245" y="115" font-size="11.5" text-anchor="middle">ett uppslag för allt</text>
+        <line x1="320" y1="102" x2="360" y2="102" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+        <rect x="364" y="76" width="150" height="52" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="439" y="98" font-size="13" text-anchor="middle" font-weight="600">Kräver spacet MFA?</text>
+        <text x="439" y="115" font-size="11.5" text-anchor="middle">ett reglage per space</text>
+        <line x1="514" y1="102" x2="554" y2="102" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+        <text x="534" y="94" font-size="11.5" text-anchor="middle">ja</text>
+        <rect x="558" y="76" width="186" height="52" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="651" y="98" font-size="13" text-anchor="middle" font-weight="600">Har sessionen MFA?</text>
+        <text x="651" y="115" font-size="11.5" text-anchor="middle">avgjort vid inloggningen</text>
+        <line x1="439" y1="128" x2="439" y2="176" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+        <text x="449" y="156" font-size="11.5">nej</text>
+        <rect x="364" y="180" width="150" height="36" rx="8" style="fill:var(--ok-soft);stroke:var(--ok)" stroke-width="1.5"/>
+        <text x="439" y="203" font-size="13" text-anchor="middle">Släpps in</text>
+        <line x1="600" y1="128" x2="518" y2="190" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+        <text x="546" y="150" font-size="11.5">ja</text>
+        <line x1="700" y1="128" x2="700" y2="176" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+        <text x="710" y="156" font-size="11.5">nej</text>
+        <rect x="596" y="180" width="148" height="36" rx="8" style="fill:var(--warn-soft);stroke:var(--warn)" stroke-width="1.5"/>
+        <text x="670" y="203" font-size="13" text-anchor="middle">"Logga in med MFA"</text>
+        <line x1="392" y1="128" x2="324" y2="186" stroke="currentColor" stroke-width="1.5" marker-end="url(#m3)"/>
+        <text x="352" y="150" font-size="11.5" text-anchor="end">ja, men ingen person bakom</text>
+        <rect x="170" y="180" width="150" height="36" rx="8" style="fill:var(--bad-soft);stroke:var(--bad)" stroke-width="1.5"/>
+        <text x="245" y="203" font-size="13" text-anchor="middle">Tydligt avslag</text>
+        <text x="16" y="34" font-size="12">En kontroll vid ingången, i stället för en kontroll på vart och ett av cirka 105 ställen.</text>
+        <text x="16" y="52" font-size="12">En API-nyckel, en åtkomstkod eller en widgetbesökare har ingen person bakom sig och kan inte visa MFA.</text>
+      </svg>
+</div>
+<figcaption>Kontrollen vid ingången. Den som saknar MFA loggar in igen genom den vanliga inloggningen och får en ny session. En session har MFA från början eller aldrig. Uppslaget av spacet är detsamma som nycklar låsta till ett space redan använder.</figcaption>
+</figure>
+
+**Administratören av ett space**
+
+- Ett reglage: "Kräv MFA", på vanliga delade space. Organisationens space och personliga space har det inte.
+- Gäller allt i spacet, också flöden och modulen.
+- Går bara att slå på när organisationen har ställt in vad MFA betyder.
+- Är något i spacet inte skyddat svarar reglaget nej, med ett skäl som går att åtgärda.
+
+**Organisationens inställning**
+
+- Vilket fält som läses: `acr` eller `amr`.
+- Vilket värde som betyder MFA.
+- Valfritt: hur Eneo ber om MFA (`acr_values` eller `claims`).
+- Den som ändrar regeln måste vara inloggad med MFA enligt den regel som gäller, utom första gången regeln ställs in. Blir regeln fel går den att rätta via operatören, den som driftar Eneo.
+
+**Nycklar och besökare**
+
+- En API-nyckel, en åtkomstkod eller en widgetbesökare kan inte visa MFA.
+- De får ett tydligt avslag i ett MFA-space.
+- Utanför MFA-space fungerar de som i dag.
+
+### Så märker användaren det
+
+<figure class="figur">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+<svg viewBox="0 0 760 366" role="img" aria-label="Användaren öppnar ett space som kräver MFA och ser ett lås och knappen Logga in med MFA. Knappen skickar personen till IdP:n, som frågar efter den andra faktorn och lösenordet om den kräver det. IdP:n skickar en signerad biljett med acr till Eneo, som skapar en ny session med MFA och skickar personen tillbaka till spacet.">
+        <defs><marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <g stroke="currentColor" stroke-width="1" stroke-dasharray="3 4">
+          <line x1="110" y1="42" x2="110" y2="356"/><line x1="380" y1="42" x2="380" y2="356"/><line x1="650" y1="42" x2="650" y2="356"/>
+        </g>
+        <rect x="35" y="12" width="150" height="30" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="110" y="32" font-size="12.5" font-weight="600" text-anchor="middle">Användaren</text>
+        <rect x="305" y="12" width="150" height="30" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="380" y="32" font-size="12.5" font-weight="600" text-anchor="middle">Eneo</text>
+        <rect x="575" y="12" width="150" height="30" rx="8" style="fill:var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+        <text x="650" y="32" font-size="12.5" font-weight="600" text-anchor="middle">IdP:n</text>
+        <line x1="110" y1="72" x2="376" y2="72" stroke="currentColor" stroke-width="1.5" marker-end="url(#m4)"/>
+        <text x="245" y="64" font-size="12" text-anchor="middle">öppnar spacet</text>
+        <line x1="380" y1="108" x2="114" y2="108" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#m4)"/>
+        <text x="245" y="100" font-size="12" text-anchor="middle">lås och knappen "Logga in med MFA"</text>
+        <line x1="110" y1="144" x2="376" y2="144" stroke="currentColor" stroke-width="1.5" marker-end="url(#m4)"/>
+        <text x="245" y="136" font-size="12" text-anchor="middle">klickar på knappen</text>
+        <line x1="380" y1="180" x2="646" y2="180" stroke="currentColor" stroke-width="1.5" marker-end="url(#m4)"/>
+        <text x="515" y="172" font-size="12" text-anchor="middle">skickar personen vidare</text>
+        <line x1="114" y1="222" x2="646" y2="222" stroke="currentColor" stroke-width="1.5" marker-start="url(#m4)" marker-end="url(#m4)"/>
+        <text x="515" y="214" font-size="12" text-anchor="middle">loggar in med andra faktorn</text>
+        <text x="515" y="238" font-size="11.5" text-anchor="middle">och lösenordet om IdP:n kräver det</text>
+        <line x1="650" y1="270" x2="384" y2="270" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#m4)"/>
+        <text x="515" y="262" font-size="12" text-anchor="middle">signerad biljett med acr</text>
+        <rect x="300" y="284" width="160" height="30" rx="6" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <text x="380" y="304" font-size="12.5" font-weight="600" text-anchor="middle">ny session med MFA</text>
+        <line x1="380" y1="338" x2="114" y2="338" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#m4)"/>
+        <text x="245" y="330" font-size="12" text-anchor="middle">tillbaka i spacet</text>
+      </svg>
+</div>
+<figcaption>Från ett låst space tillbaka till samma space, med en ny session. Förenklad: IdP:ns svar går i verkligheten tillbaka genom webbläsaren. En session går aldrig från nej till ja, därför blir det en ny.</figcaption>
+</figure>
+
+1. **Ett lås i listan**<br />Ett space som kräver MFA syns med namn och ett lås.
+2. **"Logga in med MFA"**<br />Knappen leder till IdP:n. Den avgör om lösenordet behövs igen eller bara den andra faktorn.
+3. **Tillbaka i spacet**<br />Personen har en ny session med MFA och kommer tillbaka dit den var.
+4. **Ingen ny fråga**<br />Ladda ner, köra om och spela in går tills sessionen slutar. Har IdP:n alltid MFA för Eneo märks steg 1 till 3 aldrig.
+
+## Biljetten: vad Eneo läser och vad den tål
+
+<div class="biljett not-content" aria-label="Exempel på innehållet i en id-token. Värdena är påhittade."><span class="ln">{'"iss": "https://login.exempel.se",'}</span><span class="ln">{'"sub": "7f3c9e…", "aud": "eneo",'}</span><span class="ln">{'"email": "anna@exempel.se", "email_verified": true,'}</span><span class="ln mfa">{'"acr": "https://exempel.se/loa/mfa",'}</span><span class="ln ign">{'"amr": ["pwd", "otp"],'}</span><span class="ln ign">{'"auth_time": 1762934400, "roles": ["…"]'}</span></div>
+
+Påhittade värden. Den markerade raden är den Eneo jämför. De gråa raderna behövs inte för MFA.
+
+| I biljetten | Vad Eneo gör |
+|---|---|
+| `acr` med det inställda värdet | Sessionen får MFA. |
+| `amr` som innehåller de inställda värdena | Sessionen får MFA. Fler metoder i listan stör inte. Finns för IdP:er som inte kan sätta `acr`. |
+| Värdet saknas eller är ett annat | Inloggningen lyckas, utan MFA. |
+| Uppgifter som Eneo inte känner till | Ignoreras. De sparas och loggas inte. Det är standardens krav. |
+| Fel format på `acr`, `amr` eller `auth_time` | Ska räknas som saknat. **Inte byggt än:** utvecklingsversionen nekar i dag hela inloggningen. Den släppta versionen 2.3 har inte de kontrollerna. |
+| Fel signatur, utfärdare eller mottagare, eller saknad e-post | Inloggningen nekas med ett tydligt fel. Det är identitet och integritet, inte valfria uppgifter. |
+
+## Vad vi valde bort, och varför
+
+| Bortvalt | Skäl |
+|---|---|
+| Uppgradera sessionen på plats (step-up) | Kräver ett eget protokoll, och varje token som modulen och andra delar bär måste hålla reda på om den skapades före eller efter. En ny inloggning ger samma resa för användaren med mycket mindre kod. Kan läggas till senare, men är då ett eget arbete. |
+| En ålder på MFA och tvingad ny inloggning | Eneo skulle behöva `auth_time`, `max_age` och `prompt=login` från IdP:n. IdP:n avgör redan hur ofta MFA görs. |
+| MFA per flöde, fil eller nedladdning | Ingen organisation hinner sköta det, och användaren förstår inte varför något nekas. |
+| En kryssruta "vår IdP kräver alltid MFA" | Då skulle Eneo påstå MFA utan stöd i biljetten. En ändring hos IdP:n, eller en inloggningsväg utan MFA, skulle öppna alla MFA-space utan att någon märker det. |
+| En kontroll på vart och ett av cirka 105 ställen i koden | En kontroll vid ingången gör samma sak med ett ställe att underhålla. Priset är att en medlem som saknar rätt till en viss åtgärd kan få frågan om MFA före sitt nej. |
+| MFA bara på nya space | Enklare, men det skyddar inte det som redan finns. MFA ska gå att slå på för ett space som redan finns, och det kräver att filerna hör till sitt space. |
+| En fil i flera space | Ingen funktion bygger på det. En regel är enklare att underhålla än två lägen. |
+
+## Tal till text och modulen
+
+- Modulen har inget eget space. Den loggar in genom Eneo, och ett flöde i ett MFA-space kräver MFA också där.
+- Modulen visar låsta space med knappen "Logga in med MFA", och MFA begärs innan inspelningen börjar.
+- Slås kravet på under en inspelning och sessionen saknar MFA, nekas uppladdningarna och den levande anslutningen stängs inom 35 sekunder, samma gräns som vid utloggning. Ljudet finns kvar lokalt. Har sessionen redan MFA fortsätter inspelningen. Gränsen på 35 sekunder provas när utloggningen byggs.
+
+<figure class="figur">
+<div class="rita" tabindex="0" role="group" aria-label="Figuren går att rulla i sidled">
+<svg viewBox="0 0 760 196" role="img" aria-label="En inspelning över tid. Eneo frågar aldrig efter MFA under inspelningen. Upphör sessionen stoppas transkriberingen i molnet inom 35 sekunder, medan ljudet fortsätter att spelas in lokalt. Efter stopp loggar personen in igen och laddar upp ljudet.">
+        <defs><marker id="m5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <text x="16" y="36" font-size="11.5">MFA begärs före start</text>
+        <text x="390" y="36" font-size="12" text-anchor="middle">Eneo frågar aldrig efter MFA under inspelningen</text>
+        <line x1="210" y1="48" x2="570" y2="48" stroke="currentColor" stroke-width="1"/>
+        <line x1="210" y1="43" x2="210" y2="53" stroke="currentColor" stroke-width="1"/>
+        <line x1="570" y1="43" x2="570" y2="53" stroke="currentColor" stroke-width="1"/>
+        <text x="16" y="96" font-size="12.5" font-weight="600">Modulen, lokalt</text>
+        <rect x="210" y="82" width="360" height="20" rx="4" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.5"/>
+        <text x="222" y="96" font-size="11.5">ljudet spelas in och sparas</text>
+        <text x="422" y="96" font-size="11.5">fortsätter lokalt</text>
+        <text x="16" y="146" font-size="12.5" font-weight="600">Molnet, transkribering</text>
+        <rect x="210" y="132" width="240" height="20" rx="4" style="fill:var(--surface)" stroke="currentColor" stroke-width="1.2"/>
+        <text x="222" y="146" font-size="11.5">transkriberas löpande</text>
+        <line x1="450" y1="126" x2="450" y2="158" style="stroke:var(--warn)" stroke-width="3"/>
+        <text x="458" y="146" font-size="11.5">stoppar inom 35 s</text>
+        <line x1="410" y1="60" x2="410" y2="166" style="stroke:var(--warn)" stroke-width="1.5" stroke-dasharray="5 4"/>
+        <line x1="210" y1="156" x2="210" y2="168" stroke="currentColor" stroke-width="1"/>
+        <line x1="570" y1="104" x2="570" y2="168" stroke="currentColor" stroke-width="1"/>
+        <text x="210" y="184" font-size="11.5">inspelningen börjar</text>
+        <text x="410" y="184" font-size="11.5" text-anchor="middle" style="fill:var(--warn)">sessionen upphör</text>
+        <text x="570" y="184" font-size="11.5" text-anchor="middle">stopp</text>
+        <line x1="570" y1="92" x2="592" y2="92" stroke="currentColor" stroke-width="1.5" marker-end="url(#m5)"/>
+        <rect x="596" y="79" width="148" height="26" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="670" y="97" font-size="12.5" font-weight="600" text-anchor="middle">Loggar in igen</text>
+        <line x1="670" y1="105" x2="670" y2="128" stroke="currentColor" stroke-width="1.5" marker-end="url(#m5)"/>
+        <rect x="596" y="132" width="148" height="26" rx="6" style="fill:var(--ok-soft);stroke:var(--ok)" stroke-width="1.5"/>
+        <text x="670" y="150" font-size="12.5" font-weight="600" text-anchor="middle">Laddar upp ljudet</text>
+      </svg>
+</div>
+<figcaption>En inspelning i ett MFA-space. Upphör sessionen stoppas transkriberingen i molnet inom 35 sekunder, och ljudet finns kvar lokalt. Efter stopp loggar personen in igen och laddar upp.</figcaption>
+</figure>
+
+I dag stänger utloggning varken modulens åtkomst eller en pågående inspelning. Det rättas som en egen del, oavsett MFA.
+
+För att ett krav på spacet ska nå inspelningar och transkript måste filerna höra till sitt space. Det beskrivs på sidan [Space och ägande i Eneo](/space-och-agande/).
+
+## Vad som krävs för att börja prova internt
+
+1. <small>IdP:n</small><br />**Ett värde i biljetten som betyder MFA**<br />Helst ett `acr`-värde i id-token för Eneos testklient. Vad som ska ställas in i OneGate och vem som gör vad står på sidan [MFA med OneGate: vem gör vad](/onegate/).
+2. <small>IdP:n</small><br />**Ett sätt att få MFA när det behövs**<br />Antingen tar IdP:n emot en begäran om MFA, eller så är MFA obligatoriskt för Eneos klient.
+3. <small>Eneo</small><br />**Eneo tål biljetten**<br />Rättningen som räknar fel format som saknat i stället för att neka inloggningen. Tills den finns ska värdet slås på i testmiljön först.
+4. <small>prov</small><br />**En testinloggning**<br />Vi läser namn och värde på `acr` och `amr` i en riktig biljett, med och utan MFA. Hela biljetten sparas aldrig.
+5. <small>Eneo</small><br />**Sessionens MFA och reglaget**<br />Byggs i kärnan och provas först mot en IdP i container, sedan mot test-IdP:n.
+
+| IdP | Så visar den MFA | Läge |
+|---|---|---|
+| MobilityGuard OneGate | Okänt. Testmiljön annonserar inga värden, och ingen har sett en riktig biljett från den. | <Badge text="beställs" variant="caution" /> |
+| Keycloak (i container) | `acr` och `amr`; tar emot `acr_values` eller `claims`. | <Badge text="provad 11 november" variant="success" /> |
+| Microsoft Entra ID | `amr` med till exempel `mfa`, enligt Microsofts dokumentation. | <Badge text="inte provad" variant="default" /> |
+
+## Läget
+
+### Designen
+
+- Designen är prövad mot koden.
+- Ordningen för hela arbetet står på [Ta över arbetet](/): sessionens MFA och filernas hemvist byggs samtidigt, sedan kontrollen vid ingången, i [ordningen](/space-och-agande/#ordningen) på sidan Space och ägande i Eneo.
+
+### Byggt, inte granskat
+
+- Organisationens regel för vad som räknas som MFA.
+- Behörigheten att hantera den.
+- Båda finns på en gren som inte är granskad. Bygget är pausat.
+
+### Inte byggt än
+
+- Sessionens ja eller nej.
+- Filens hemvist och läsning med den egna inloggningen.
+- Kontrollen vid ingången och reglaget.
+- Modulens del.
+- Inget är kört mot en riktig IdP.
+
+## Standarderna
+
+| Standard | Vad den ger oss |
+|---|---|
+| OpenID Connect Core 1.0 | Biljetten, fälten `acr` och `amr`, och `acr_values` och `claims` för att be om MFA. Säger också att uppgifter som inte förstås ska ignoreras. |
+| RFC 8176 | Gemensamma namn på metoder i `amr`, till exempel `mfa`. |
+| RFC 9470 | Svaret till appar och moduler när MFA saknas: "logga in med MFA och försök igen". |
+| RFC 7636, RFC 9700 | PKCE och aktuell säkerhetspraxis för inloggningsflödet. |
+
+## Beslut
+
+### 2. MFA sitter på space
+
+**Det betyder:** Kravet ställs in per space och gäller allt i spacet. Det går att slå på för space som redan finns.
+
+**Varför:** Spacet är det gemensamma arbetsområdet, och det enda ställe där en organisation har tid att hantera ett krav.
+
+**Pris:** Filerna måste höra till sitt space innan reglaget finns.
+
+### 3. Den som saknar MFA loggar in igen
+
+**Det betyder:** Sessionen får ett ja eller nej om MFA vid inloggningen, och det ändras inte under sessionen. Den som saknar MFA och öppnar ett space som kräver det loggar in igen med MFA och får en ny session.
+
+**Varför:** Det är samma väg för personen som en vanlig inloggning, och mycket mindre att underhålla än att uppgradera en pågående session.
+
+**Pris:** Den som är inloggad utan MFA gör om inloggningen innan spacet öppnas.
+
+### 4. En fil hör till ett space
+
+**Det betyder:** Varje fil har en hemvist, och en fil används bara i sitt eget space. Den som vill ha filen i ett annat space laddar upp den där.
+
+**Varför:** Annars når ett krav på spacet aldrig inspelningarna.
+
+**Pris:** En egen del med migrering i kärnan, och klienterna läser filer med inloggningen i stället för med länkar.
+
+## Underärenden på GitHub
+
+<Underarenden epic={804} />
+
+## Hör ihop med
+
+- [Ta över arbetet](/): läget, ordningen och länkar till allt annat
+- [Vägen till produktion](/vagen-till-produktion/)
+- [Space och ägande i Eneo](/space-och-agande/)
+- [MFA med OneGate: vem gör vad](/onegate/)
+- [MFA på space på GitHub (#804)](https://github.com/eneo-ai/eneo/issues/804): uppgifterna i den ordning de byggs, med skisser
+
+---
+
+Källor: planen för MFA:s första leverans med granskningens domar, designen för ägande, underlaget för OneGate, ett prov mot Keycloak 11 november och Microsofts dokumentation om Entra ID. Alla exempelvärden är påhittade.

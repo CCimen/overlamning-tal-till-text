@@ -1,0 +1,41 @@
+---
+// Underärendena till en epic på GitHub, ur lage.json. Tillståndet är ärendets på GitHub,
+// inte leveransens läge: ett ärende kan vara öppet fast koden har landat, och tvärtom.
+import lage from '../data/lage.json';
+
+interface Props {
+	epic: 804 | 1425;
+}
+
+const { epic } = Astro.props;
+const arenden = lage.github[String(epic) as keyof typeof lage.github];
+// Exporten skriver github_hamtad; en ändring för hand i läget rör den inte.
+const hamtad = new Date(lage.github_hamtad).toLocaleString('sv-SE', {
+	timeZone: 'Europe/Stockholm',
+	dateStyle: 'long',
+	timeStyle: 'short',
+});
+---
+
+<p>
+	Underärendena till <a href={`https://github.com/eneo-ai/eneo/issues/${epic}`}>#{epic}</a> på GitHub, hämtade
+	<time datetime={lage.github_hamtad}>{hamtad}</time>. Tillståndet är ärendets på GitHub och säger inte om leveransen är
+	klar; leveransens läge står på startsidan. Raderna står i GitHubs ordning. Ordningen de byggs i står i epicens lista
+	"In order".
+</p>
+<table>
+	<thead>
+		<tr><th scope="col">Ärende</th><th scope="col">Titel</th><th scope="col">Tillstånd på GitHub</th></tr>
+	</thead>
+	<tbody>
+		{
+			arenden.map((a) => (
+				<tr>
+					<td><a href={`https://github.com/eneo-ai/${a.forrad}/issues/${a.nummer}`}>{a.forrad}{'\u00a0'}#{a.nummer}</a></td>
+					<td>{a.titel}</td>
+					<td>{a.tillstand}</td>
+				</tr>
+			))
+		}
+	</tbody>
+</table>

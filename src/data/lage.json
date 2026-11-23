@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-23T07:51+01:00",
-  "github_hamtad": "2026-11-23T07:51+01:00",
+  "hamtad": "2026-11-23T08:52+01:00",
+  "github_hamtad": "2026-11-23T08:52+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -61,11 +61,11 @@
     {
       "rubrik": "Reglerna för gallring i Flöden som körbara exempel, kantfallen och mätningen av en riktig körning",
       "lage": "Reglerna för gallring per space, flöde och steg är provade mot kärnans befintliga regel och granskade i tre omgångar som letade kantfall. Ordningen för bygget är bestämd; det som återstår här är att mäta en riktig körning.",
-      "vantar": "att en riktig körning mäts på Flödes-grenen, som nu har synken."
+      "vantar": "att synken landar på Flödes-grenen; sedan mäts en riktig körning."
     },
     {
       "rubrik": "Filens ägare döps om och ursprunget skrivs på filraden",
-      "lage": "Granskningen av hela ändringen hittade inga fel i koden; fem små rättningar återstår innan den kan läggas upp för granskning på GitHub.",
+      "lage": "Rättningarna efter granskningen är gjorda och proven är gröna. Ändringen slås ihop med Flödes-grenen när synken har landat och granskas då en sista gång.",
       "vantar": "att Flödes-grenen har fått det senaste från huvudgrenen."
     }
   ],

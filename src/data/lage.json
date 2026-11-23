@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-23T12:18+01:00",
-  "github_hamtad": "2026-11-23T12:18+01:00",
+  "hamtad": "2026-11-23T12:30+01:00",
+  "github_hamtad": "2026-11-23T12:30+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -103,11 +103,6 @@
     {
       "rubrik": "Kopplingen mellan en modul och en riktig Eneo byggs i den smalnade formen",
       "text": "Kopplingen mellan en modul och en riktig Eneo: guiden och en säker lokal start byggs nu, och ett kontrollkommando först när Eneo kan svara på om en nyckel hör till modulen. Väntar på ett ja eller nej.",
-      "prioritet": 2
-    },
-    {
-      "rubrik": "Redigerarens PR får landa med ett känt fynd om läsarraden medan en hämtning pågår",
-      "text": "Redigeraren kan under en kort hämtning visa en läsare som just ändrats. Frågan är om den får landa med det redovisat.",
       "prioritet": 2
     },
     {

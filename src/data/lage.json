@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-22T21:37+01:00",
-  "github_hamtad": "2026-11-22T21:37+01:00",
+  "hamtad": "2026-11-23T07:51+01:00",
+  "github_hamtad": "2026-11-23T07:51+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -65,8 +65,8 @@
     },
     {
       "rubrik": "Filens ägare döps om och ursprunget skrivs på filraden",
-      "lage": "Granskningen av hela ändringen hittade inga fel i koden; fem små rättningar återstår (tre prov, två texter) innan den kan läggas upp för granskning på GitHub. Uppgraderingen med en miljon syntetiska filrader på lokal PostgreSQL 16 tog 4,3 sekunder, varav det nya steget 0,07.",
-      "vantar": "beslut om vem som tar arbetet vidare på Flödes-grenen, och en giltig OpenAI-nyckel i provmiljön; provet med riktiga modeller är inte gjort på den senaste versionen."
+      "lage": "Granskningen av hela ändringen hittade inga fel i koden; fem små rättningar återstår innan den kan läggas upp för granskning på GitHub.",
+      "vantar": "att Flödes-grenen har fått det senaste från huvudgrenen."
     }
   ],
   "beslut": [

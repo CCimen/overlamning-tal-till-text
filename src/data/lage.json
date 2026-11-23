@@ -1,10 +1,10 @@
 {
-  "hamtad": "2026-11-23T10:24+01:00",
-  "github_hamtad": "2026-11-23T10:24+01:00",
+  "hamtad": "2026-11-23T12:18+01:00",
+  "github_hamtad": "2026-11-23T12:18+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
-      "klara": 6,
+      "klara": 7,
       "totalt": 26,
       "nasta": "Kärnans besked när en körning eller en del av den är borttagen",
       "pausad": null
@@ -62,19 +62,9 @@
       "rubrik": "Reglerna för gallring i Flöden som körbara exempel, kantfallen och mätningen av en riktig körning",
       "lage": "Reglerna för gallring per space, flöde och steg är provade mot kärnans befintliga regel och granskade i tre omgångar som letade kantfall. Ordningen för bygget är bestämd; det som återstår här är att mäta en riktig körning.",
       "vantar": "rättat manus och att provstacken blir ledig."
-    },
-    {
-      "rubrik": "Filens ägare döps om och ursprunget skrivs på filraden",
-      "lage": "Rättningarna efter granskningen är gjorda och proven är gröna. Ändringen slås ihop med Flödes-grenen när synken har landat och granskas då en sista gång.",
-      "vantar": "att Flödes-grenen har fått det senaste från huvudgrenen."
     }
   ],
   "beslut": [
-    {
-      "rubrik": "Räcker spaceadmin för att ändra spacets tid",
-      "text": "Ska en admin i ett space kunna ändra spacets gallringstid själv, eller ska det också kräva gallringsbehörigheten på rollen?",
-      "prioritet": 1
-    },
     {
       "rubrik": "Vilka användare och data möter eneo-test vid första driftsättningen",
       "text": "Vilka som ska använda eneo-test först, och med vilka data, avgör om två skyddssteg för flödesfiler och modellval måste vara klara före uppgraderingen eller först innan verksamheterna bjuds in.",
@@ -113,6 +103,11 @@
     {
       "rubrik": "Kopplingen mellan en modul och en riktig Eneo byggs i den smalnade formen",
       "text": "Kopplingen mellan en modul och en riktig Eneo: guiden och en säker lokal start byggs nu, och ett kontrollkommando först när Eneo kan svara på om en nyckel hör till modulen. Väntar på ett ja eller nej.",
+      "prioritet": 2
+    },
+    {
+      "rubrik": "Redigerarens PR får landa med ett känt fynd om läsarraden medan en hämtning pågår",
+      "text": "Redigeraren kan under en kort hämtning visa en läsare som just ändrats. Frågan är om den får landa med det redovisat.",
       "prioritet": 2
     },
     {

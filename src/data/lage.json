@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-23T09:42+01:00",
-  "github_hamtad": "2026-11-23T09:42+01:00",
+  "hamtad": "2026-11-23T10:24+01:00",
+  "github_hamtad": "2026-11-23T10:24+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -71,6 +71,11 @@
   ],
   "beslut": [
     {
+      "rubrik": "Räcker spaceadmin för att ändra spacets tid",
+      "text": "Ska en admin i ett space kunna ändra spacets gallringstid själv, eller ska det också kräva gallringsbehörigheten på rollen?",
+      "prioritet": 1
+    },
+    {
       "rubrik": "Vilka användare och data möter eneo-test vid första driftsättningen",
       "text": "Vilka som ska använda eneo-test först, och med vilka data, avgör om två skyddssteg för flödesfiler och modellval måste vara klara före uppgraderingen eller först innan verksamheterna bjuds in.",
       "prioritet": 1
@@ -81,8 +86,18 @@
       "prioritet": 1
     },
     {
+      "rubrik": "Gallring på stegnivå i första versionen",
+      "text": "Ska ett flöde kunna ha en egen gallringstid per steg redan i första versionen, eller räcker en tid för hela körningen, med ljudet borttaget när sista steget är klart, fram till efter piloten?",
+      "prioritet": 1
+    },
+    {
       "rubrik": "Hur den som tar över får ärendelistan",
       "text": "I dag finns ärendelistan bara lokalt hos den som leder arbetet. Förslaget är en privat kopia som den som tar över uppdaterar själv.",
+      "prioritet": 1
+    },
+    {
+      "rubrik": "Påslaget av gallring i ett space är en egen handling",
+      "text": "Ska gallringen av flöden slås på uttryckligen per space, eller ska ett space som redan har en tid för samtal börja gallra nya körningar direkt?",
       "prioritet": 1
     },
     {

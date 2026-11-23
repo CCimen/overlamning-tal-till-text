@@ -11,15 +11,15 @@ import { Badge } from '@astrojs/starlight/components';
 
 Vad som byggs om i Flöden medan ingen databas ännu binder oss, vad som ska vara klart innan eneo-test uppgraderas och innan verksamheterna bjuds in, och vägen därefter till produktion.
 
-<Badge text="Pågår" variant="caution" /> Eneo-test uppgraderas med en låst avbild från Flödes-grenen, utan MFA och utan release. 1.1, 1.2, 1.2b och 1.14 har landat. Nästa synk av develop är granskad och väntar på CI, och filens ursprung (1.5) är byggt och rättat och landar efter den. Sedan kommer gallringen. Teamets egna standups ska under tiden köras på en egen server utan gallring. Produktionen kommer efter space, ägande och MFA; låst avbild eller release är inte bestämt, och tidpunkt 3 gäller bara vid en release.
+<Badge text="Pågår" variant="caution" /> Eneo-test uppgraderas med en låst avbild från Flödes-grenen, utan MFA och utan release. 1.1, 1.2, 1.2b och 1.14 har landat, liksom gallringens delade värden och modulens visning av utskickets läge. Synken av develop och redigerarens andra del är granskade och väntar på CI, filens ursprung (1.5) är byggt och landar efter synken, och avbilden från Flödes-grenen byggs. Sedan kommer gallringen i en enkel första version. Teamets standups körs under tiden som ett internt prov på en egen server utan gallring. Produktionen kommer efter space, ägande och MFA; låst avbild eller release är inte bestämt, och tidpunkt 3 gäller bara vid en release.
 
 ## Kort sagt
 
 1. **Körningarnas kärna i Flöden är väl byggd och står kvar.** Delningen mellan utkast, fryst version och körning, nycklarna som håller organisationen rätt, och utlådorna som inte tappar något.
 2. **Skulden ligger i sömmarna mot kärnan.** Flöden har på minst sju ställen en egen variant av en regel som kärnan äger, och bär stegens och byggchattens inställningar på dolda assistentrader.
-3. **Flöden gallras av kärnans gallringsmotor, inte av en egen.** Körningarnas tid väljs per organisation, space och flöde, med spacet som tak, och ljudet och stegen kan få en kortare tid i timmar. Inget innehåll gallras förrän någon har valt en tid. Rester som aldrig blev en körning städas efter 24 timmar som standard, en tid som organisationen kan ändra eller stänga av, och ett borttaget flöde slutstädas. Flöden får ingen egen schemaläggare.
+3. **Flöden gallras av kärnans gallringsmotor, inte av en egen.** Körningarnas tid väljs för spacet och flödet, med spacet som tak. En administratör i spacet slår på gallringen, och bara körningar som startar därefter tas bort. Ljudet kan få en kortare tid; egna tider per steg kommer efter piloten. Inget innehåll gallras förrän någon har valt en tid. Rester som aldrig blev en körning städas efter 24 timmar som standard, en tid som organisationen kan ändra eller stänga av, och ett borttaget flöde slutstädas. Flöden får ingen egen schemaläggare.
 4. **Spacets roll avgör vad man får göra med ett flöde,** ovanpå kontots behörighet för Flöden. Den personliga ägaren försvinner.
-5. **Enligt vad vi vet har ingen databas som ska bevaras kört Flödes-grenen.** Driften bekräftar det före [steg 1.9](#steg-1-9); först då byggs schema och migrationer om.
+5. **Migrationskedjan behålls.** Teamets server kör Flödes-grenen på en databas som ska behållas, så schemat ändras med revisioner framåt, och [steg 1.9](#steg-1-9) görs inte före piloten.
 6. **Fyra tidpunkter styr ordningen:** före den första databasen, före de första användarna, före develop (bara om produktionen blir en release) och före känsligt material. Stegen före eneo-test står under [Tidpunkt 1](#tidpunkt-1-före-den-första-databasen).
 7. **Space, ägande och MFA ingår inte, och båda är pausade.** Planen ser till att Flöden inte gör dem svårare när de startas.
 
@@ -154,7 +154,9 @@ Uppgift på GitHub: [#1431](https://github.com/eneo-ai/eneo/issues/1431).
 </details>
 
 <details id="steg-g3">
-<summary><strong>G3</strong> Ett steg får en egen tid<br /><small>Flödes-grenen</small></summary>
+<summary><strong>G3</strong> Ett steg får en egen tid<br /><small>Flödes-grenen, efter piloten</small></summary>
+
+Beslutat 2026-11-23: den första versionen har en tid för hela körningen; egna tider per steg kommer efter piloten.
 
 En tid per steg, i timmar, under flödets och spacets tak. När tiden har gått tas stegets innehåll och dess kopior i körningen bort.
 
@@ -215,7 +217,7 @@ _Annars uppstår dolda assistenter som ingen längre kan koppla till ett flöde,
 <details id="steg-1-9">
 <summary><strong>1.9</strong> En ren migrationsgrund, skuren sist<br /><small>Flödes-grenen</small></summary>
 
-**Före steget:** driften bekräftar att ingen databas som ska bevaras har kört Flödes-grenen. Tills dess byggs schema och migrationer inte om.
+**Beslutat 2026-11-23:** teamets server kör Flödes-grenen på en databas som ska behållas. Steget görs därför inte före piloten, och schemat ändras med revisioner framåt.
 
 Två eller tre revisioner ovanpå develops huvud ersätter de 75, när formändringarna ovan har landat och ingen annan lägger till migrationer.
 

@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-23T09:23+01:00",
-  "github_hamtad": "2026-11-23T09:23+01:00",
+  "hamtad": "2026-11-23T09:42+01:00",
+  "github_hamtad": "2026-11-23T09:42+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -83,11 +83,6 @@
     {
       "rubrik": "Hur den som tar över får ärendelistan",
       "text": "I dag finns ärendelistan bara lokalt hos den som leder arbetet. Förslaget är en privat kopia som den som tar över uppdaterar själv.",
-      "prioritet": 1
-    },
-    {
-      "rubrik": "Ska ett space som redan har en gallringstid börja ta bort flödeskörningar direkt efter uppgraderingen",
-      "text": "Ska ett space som redan har en gallringstid börja ta bort flödeskörningar direkt efter uppgraderingen? Tills vidare gäller att inget tas bort förrän en administratör har sett hur mycket som berörs och slagit på det.",
       "prioritet": 1
     },
     {

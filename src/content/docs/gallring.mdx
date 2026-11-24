@@ -1,6 +1,6 @@
 ---
 title: Gallring
-description: En gallringstid per nivå, motorn, var innehållet finns och vem som tar bort det, vad som är klart och kvar, och besluten om gallringen.
+description: Första versionen i Flöden, en gallringstid per nivå, motorn, var innehållet finns och vem som tar bort det, vad som är klart och kvar, och besluten om gallringen.
 tableOfContents:
   maxHeadingLevel: 2
 ---
@@ -8,11 +8,68 @@ tableOfContents:
 import { Badge } from '@astrojs/starlight/components';
 import Underarenden from '../../components/Underarenden.astro';
 
-## Gallringen: en tid per nivå
-
 Varje nivå har en tid eller ingen. Spacet är tak. En lägre nivå kan korta men aldrig förlänga, och det som saknar tid ärver. Tiden räknas efter innehållets ålder.
 
-**Första versionen i Flöden (beslutat 2026-11-23).** En administratör i spacet slår på gallringen genom att sätta spacets tak, och flödet kan välja en kortare tid under taket. Bara körningar som startar efter påslaget tas bort automatiskt; körningar som fanns innan rörs inte, så påslaget behöver varken antal eller bekräftelse. En kortad tid får en enkel varning. Ljudet kan tas bort när flödets sista steg är klart. Egna tider per steg kommer efter piloten. Figuren nedan visar hela modellen, med stegen.
+## Första versionen i Flöden
+
+Beslutat 24 november. Där resten av sidan säger något annat om Flöden gäller det här avsnittet.
+
+### Modellen
+
+- **Spacets tid är taket för alla resurser i spacet, också Flöden.** Att sätta tiden är påslaget. Flöden har inget eget påslag.
+- **Följden vid uppgraderingen:** ett space som redan har en tid för samtal börjar gallra flödeskörningar som startar efter uppgraderingen.
+- **Flödet:** ett flöde utan egen tid får spacets tid. Ett flöde kan välja en lägre tid, aldrig en högre.
+- **Varje körning räknas från sin egen tid.** Inga tider är hårdkodade. Tiden kommer alltid från spacets tak och flödets tid.
+- **Bara nya körningar:** bara körningar som startar medan spacet har en tid märks och gallras. Körningar från före påslaget rörs inte.
+- **Filerna följer körningen.** När körningen tas bort tas dess filer bort i samma steg: ljud, pdf, skapade dokument och livetext. En fil som en annan körning fortfarande använder står kvar tills den sista användningen är borta.
+- **Gallrat går inte att återställa.** Raderna tas bort på riktigt, och filernas innehåll tas bort i lagringen.
+- **I spacets inställningar** säger fältet att tiden gäller alla resurser, också Flöden. En mening visas när tiden sparas, och en varning när tiden kortas.
+
+### Ordningen
+
+1. **Tre öppna ändringar landar i Flödes-grenen, var för sig:** del 1 av flödets tid ([#1513](https://github.com/eneo-ai/eneo/pull/1513)), redigerarens avsnitt Leverans ([#1508](https://github.com/eneo-ai/eneo/pull/1508)) och livetext ([#1514](https://github.com/eneo-ai/eneo/pull/1514)).
+2. **Ett prov för hand.** En riktig körning med tal till text mäts och tas bort för hand i en provmiljö. Provet visar att filernas innehåll verkligen är borta i lagringen. Mätningen avgör hur stor en körning är för motorn. Provet görs innan uppdraget för del 2 skrivs klart.
+3. **Del 2 gör borttagningen automatisk**, i en ändring mot Flödes-grenen:
+   - körningen märks när den startar;
+   - en uppgift i kärnans motor går var femte minut och tar bort märkta körningar med sina filer när tiden har gått;
+   - en körning som är för stor eller fallerar hoppas över och prövas igen, utan att stoppa resten;
+   - en spärrad körning står kvar;
+   - fältet, meningen och varningen i spacets inställningar;
+   - uppgraderingsanteckningar.
+4. **Testet.** En avbild från Flödes-grenen startas på en separat testserver, och första versionen provas där, inte på eneo-test.
+5. **Senare, i den här ordningen efter testet:**
+   - ljudet tas bort tidigare än resten av körningen, med en egen, kortare tid för ljudet;
+   - personliga space, som inte får någon automatisk gallring i första versionen;
+   - en överblick per resurs i spacets inställningar;
+   - tid per steg.
+
+   Därefter kommer de övriga stegen före eneo-test: 1.7 och 1.10–1.15 på sidan [Första leveransen till eneo-test](/forsta-leveransen/).
+
+### När del 2 är klar
+
+Del 2 är klar när det visas i en körande miljö, med den riktiga uppgiften och åldrade körningar:
+
+- spacets tid gäller, och en lägre flödestid gäller;
+- utan tid tas inget bort;
+- en körning från före påslaget står kvar, och en spärrad körning står kvar;
+- filernas innehåll är borta i lagringen, och en gammal länk ger 404;
+- en för stor körning hindrar inte resten;
+- hälsokontrollen är grön.
+
+### Kända kopior utanför kärnan
+
+Testguiden räknar upp dem:
+
+- ord som webbläsaren har sparat;
+- inspelningar på enheten;
+- talaridentifieringens kopia, som finns kvar i 72 timmar;
+- databasens säkerhetskopior, tills de har åldrats ut.
+
+Modulen ändras inte för testet.
+
+## Gallringen: en tid per nivå
+
+Figurerna och listorna nedan visar hela modellen. Ljudets egen tid och tid per steg kommer efter första versionen, i ordningen ovan.
 
 <div class="tree" role="figure" aria-label="Organisationen har ingen grundtid. Spacet har sju dagar som tak. En assistent som vill ha trettio dagar får sju. Ett flöde utan egen tid får sju. I flödet har transkriberingssteget tjugofyra timmar, sammanfattningssteget ärver sju dagar, och källjudet tas bort direkt när körningen slutat.">
   <div class="node"><strong>Organisation</strong><span class="why">grundtid för alla space, om den är satt</span></div>
@@ -39,7 +96,7 @@ Varje nivå har en tid eller ingen. Spacet är tak. En lägre nivå kan korta me
     <div class="bar-row"><div class="bar-label">Sammanfattningen, körningen och utdatafilerna <span>borta efter 7 dagar</span></div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div></div>
     <div class="bar-axis" aria-hidden="true"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7 dagar</span></div>
   </div>
-  <figcaption>Planerat, när gallringen i Flöden är byggd. Ett exempel med sju dagar på spacet och ett dygn på transkriptet, i skala: ljudet försvinner direkt på enheten och i Eneo, och hos taltjänsten när Eneo har sparat resultatet och kvitterat; en tjänst som inte stöder kvittens behåller den sin angivna tid. Transkriptet försvinner efter ett dygn, och allt som finns kvar av körningen efter spacets sju dagar. Text som en modell har skrivit, som sammanfattningen, följer sitt eget steg.</figcaption>
+  <figcaption>Planerat för senare, efter första versionen. I första versionen tas ljudet och filerna bort med körningen när tiden har gått. Ett exempel med sju dagar på spacet och ett dygn på transkriptet, i skala: ljudet försvinner direkt på enheten och i Eneo, och hos taltjänsten när Eneo har sparat resultatet och kvitterat; en tjänst som inte stöder kvittens behåller den sin angivna tid. Transkriptet försvinner efter ett dygn, och allt som finns kvar av körningen efter spacets sju dagar. Text som en modell har skrivit, som sammanfattningen, följer sitt eget steg.</figcaption>
 </figure>
 
 - **Utan tid tas inget bort.** Städning av rester är inte gallring. Organisationen ska kunna ändra tiden eller stänga av städningen av uppladdningar och livetext som aldrig blev en körning; förvalet är ett dygn. Tillfälliga arbetsfiler städas för sig. I dag finns ingen sådan städning i Flöden.
@@ -100,16 +157,16 @@ Varje del pekar bara ut vad som är förfallet och varför. Motorn gör resten, 
    - **Efter:** "Avbryt" tar också bort uppladdningen i Eneo.
 - **Ljudfilen i Eneo**
    - **I dag:** ligger kvar tills någon rensar hela körningen för hand.
-   - **Efter:** tas bort efter källjudets tid, och lagringen bekräftar.
+   - **Efter:** i första versionen tas den bort med körningen när tiden har gått, och innehållet tas bort i lagringen. Senare får ljudet en egen, kortare tid.
 - **Ljud utan körning**
    - **I dag:** tas aldrig bort.
-   - **Efter:** städas efter 24 timmar.
+   - **Efter:** städas efter 24 timmar som standard, en tid som organisationen kan ändra eller stänga av.
 - **Tillfälliga filer**
    - **I dag:** i develop får varje process en egen katalog, som städas vid nästa start.
    - **Efter:** samma i Flöden, och provet genom modulen visar att inget blir kvar.
 - **Transkript och stegresultat**
    - **I dag:** bara hela körningar kan rensas, för hand.
-   - **Efter:** varje steg efter sin tid, körningen efter flödets.
+   - **Efter:** i första versionen tas de bort med körningen efter flödets tid. Senare tas varje steg bort efter sin egen tid.
 - **Talaridentifieringen**
    - **I dag:** ljudet tas bort när jobbet är klart, men resultatet med orden ligger kvar i tre dygn.
    - **Efter:** resultatet tas bort när Eneo har sparat det, och Eneo får ett kvitto.
@@ -139,26 +196,26 @@ En återställning tar också tillbaka reglerna som gällde då. Efter en åters
 | G1 | **Täta körningar i kärnan**<br />Gallringen kan köras var femte minut i stället för en gång per natt, så att en timme betyder en timme. En ärvd tid räknas som tak. Återläsningen från en säkerhetskopia täcker också de täta körningarna. För dagens användare ändras bara hälsokontrollen: den visar "okänd" när en körning inte hann mäta förseningen, en ny körning efter en som föll visar "försämrad" tills den är klar, och tiden räknas efter databasens klocka. Landade 12 november.<br />[PR #1419](https://github.com/eneo-ai/eneo/pull/1419) | D E | <Badge text="Klart" variant="success" /> |
 | G0 | **Stegnivåns namn och felet för en tid över taket**<br />Två värden som måste vara desamma i develop och i Flöden: namnet på nivån för steg i kärnans regel, och felsvaret när en tid är längre än taket, med taket och varifrån det kommer. Reglerna för gallring finns som tester i kärnan. Inget beteende ändras förrän Flöden använder dem. Landade 18 november.<br />[PR #1466](https://github.com/eneo-ai/eneo/pull/1466) · [#1426](https://github.com/eneo-ai/eneo/issues/1426) | D | <Badge text="Klart" variant="success" /> |
 |  | **Kvar** |  |  |
-| 1.3 | **Flödets tid gäller och verkställs** <Badge text="Ny modell" variant="note" /><br />Byggs före eneo-test i två delar. Del 1 är regeln: en tid per nivå, utan lägen. Spacets tid är tak för flödena i spacet, och ett flöde kan bara välja en kortare tid. För att ändra spacets tid måste man vara administratör i spacet och ha en roll med gallringsbehörigheten. Vid uppgraderingen töms varje flödes egen tid, eftersom den valdes med de gamla lägena; flödet ärver spacets tid om spacet har en, tills någon väljer igen. Ett tomt fält visar tiden som gäller och varifrån den kommer. Del 1 tar inte bort något automatiskt; den manuella rensningen finns kvar. Del 1 är en öppen PR i sin sista granskning.<br />Del 2 är den schemalagda borttagningen av hela körningar, med sina filer. En administratör i spacet slår på gallringen, och bara körningar som startar därefter tas bort automatiskt när tiden har gått; körningar som fanns innan rörs inte. Utan tid tas inget bort. En kortad tid får en enkel varning. Underlaget för del 2 tas fram nu, med en mätning av en riktig körning, och del 2 byggs efter del 1.<br />[PR #1513](https://github.com/eneo-ai/eneo/pull/1513) (del 1) · [#1428](https://github.com/eneo-ai/eneo/issues/1428) | D E | <Badge text="Pågår" variant="caution" /> |
+| 1.3 | **Flödets tid gäller och verkställs** <Badge text="Ny modell" variant="note" /><br />Byggs före eneo-test i två delar. Del 1 är regeln: en tid per nivå, utan lägen. Spacets tid är tak för flödena i spacet, och ett flöde kan bara välja en kortare tid. För att ändra spacets tid måste man vara administratör i spacet och ha en roll med gallringsbehörigheten. Vid uppgraderingen töms varje flödes egen tid, eftersom den valdes med de gamla lägena; flödet ärver spacets tid om spacet har en, tills någon väljer igen. Ett tomt fält visar tiden som gäller och varifrån den kommer. Del 1 tar inte bort något automatiskt; den manuella rensningen finns kvar. Del 1 är en öppen PR i sin sista granskning.<br />Del 2 är den schemalagda borttagningen av hela körningar, med sina filer. Att sätta spacets tid är påslaget för alla resurser, också Flöden; Flöden har inget eget påslag. Ett space som redan har en tid för samtal börjar därför gallra flödeskörningar som startar efter uppgraderingen. Bara körningar som startar medan spacet har en tid tas bort, var femte minut när tiden har gått; körningar från före påslaget rörs inte. Utan tid tas inget bort. En kortad tid får en varning. Ordningen: del 1, Leverans och livetext landar var för sig, sedan mäts och tas en riktig körning bort för hand i en provmiljö, och därefter byggs del 2. Se [Första versionen i Flöden](#första-versionen-i-flöden).<br />[PR #1513](https://github.com/eneo-ai/eneo/pull/1513) (del 1) · [#1428](https://github.com/eneo-ai/eneo/issues/1428) | D E | <Badge text="Pågår" variant="caution" /> |
 | 2.3 | **Städning av rester i Flöden** <Badge text="Före eneo-test" variant="default" /><br />Uppladdningar som aldrig blev en körning och livetranskript utan körning tas bort efter 24 timmar som standard, en tid som organisationen kan ändra eller stänga av, och filnamn försvinner ur Flödens granskningsrader.<br />[#1427](https://github.com/eneo-ai/eneo/issues/1427) | D E | <Badge text="Kvar" variant="default" /> |
-| 2.4 | **Källjudet** <Badge text="Före eneo-test" variant="default" /><br />Ljudets tid väljs på flödet: direkt när körningen är klar, ett antal timmar efter att den slutat, eller när det sista steget som behöver ljudet är klart. Utan eget val finns ljudet kvar lika länge som körningen. Direkt gäller också när körningen misslyckas eller avbryts. Livetranskriptet går med ljudet, och uppspelning svarar "borttaget".<br />[#1431](https://github.com/eneo-ai/eneo/issues/1431) | D E | <Badge text="Kvar" variant="default" /> |
-| G3 | **Stegnivån** <Badge text="Efter piloten" variant="note" /><br />Ett steg kan ha en kortare tid, i timmar. När tiden gått tas stegets innehåll och dess kopior i körningen bort; text som en modell skrivit följer sitt eget steg. En granskning som väntar avslutas vid stegets tid. Det byggchatten har läst ur en körning följer med: samtalet blir oläsbart i samma stund som stegets innehåll gallras och tas bort inom fem minuter. Flödet påverkas inte, och chatten fortsätter i ett nytt samtal. Chattens tomma läge förklarar att ett samtal som har läst en körning tas bort med körningens innehåll.<br />[#1430](https://github.com/eneo-ai/eneo/issues/1430) | D E | <Badge text="Kvar" variant="default" /> |
+| 2.4 | **Källjudet** <Badge text="Efter testet" variant="note" /><br />I första versionen tas ljudet bort med körningen när tiden har gått. Efter testet av första versionen kommer ljudet först: det får en egen, kortare tid. Ljudets tid väljs då på flödet: direkt när körningen är klar, ett antal timmar efter att den slutat, eller när det sista steget som behöver ljudet är klart. Utan eget val finns ljudet kvar lika länge som körningen. Direkt gäller också när körningen misslyckas eller avbryts. Livetranskriptet går med ljudet, och uppspelning svarar "borttaget".<br />[#1431](https://github.com/eneo-ai/eneo/issues/1431) | D E | <Badge text="Kvar" variant="default" /> |
+| G3 | **Stegnivån** <Badge text="Efter testet" variant="note" /><br />Ett steg kan ha en kortare tid, i timmar. När tiden gått tas stegets innehåll och dess kopior i körningen bort; text som en modell skrivit följer sitt eget steg. En granskning som väntar avslutas vid stegets tid. Det byggchatten har läst ur en körning följer med: samtalet blir oläsbart i samma stund som stegets innehåll gallras och tas bort inom fem minuter. Flödet påverkas inte, och chatten fortsätter i ett nytt samtal. Chattens tomma läge förklarar att ett samtal som har läst en körning tas bort med körningens innehåll.<br />[#1430](https://github.com/eneo-ai/eneo/issues/1430) | D E | <Badge text="Kvar" variant="default" /> |
 |  | **Byggchattens dolda assistent**<br />Bindningen mellan person, flöde och byggchattens assistent överlever att ett samtal tas bort (steg 1.8b, före eneo-test). Den dolda assistenten och dess inställningar tas bort när flödet tas bort. Byggs efter bindningen. Öppet: uppgiften #1429 säger i stället att assistenten tas bort med chatten. Det avgörs innan steg 1.8b byggs.<br />[#1429](https://github.com/eneo-ai/eneo/issues/1429) | E | <Badge text="Kvar" variant="default" /> |
 | G5 | **Tak för samtal och organisationens sida** <Badge text="Före slutprovet" variant="default" /><br />Spacet blir tak också för assistenter och appar. Organisationen får en sida för sin grundtid. På den sidan visar förhandsfrågan också antalet körningar: byggs sidan efter att Flöden slagits in finns det med från början, annars lägger sammanslagningen till det. Behörigheten "Gallring – hantera regler" ges ingen roll automatiskt; en administratör slår på den per roll.<br />[#1432](https://github.com/eneo-ai/eneo/issues/1432) | D | <Badge text="Kvar" variant="default" /> |
 |  | **Bilagenamn i appars granskningsrader** <Badge text="Före slutprovet" variant="default" /><br />Namn på bilagor tas ur granskningsraderna när en app uppdateras, också ur rader som redan är sparade.<br />[#1433](https://github.com/eneo-ai/eneo/issues/1433) | E | <Badge text="Kvar" variant="default" /> |
 |  | **Insiktschatten följer sina källor**<br />Varje verktyg som returnerar text från andra samtal registrerar sina källor, så att analysen försvinner med dem.<br />[PR #814 (stängd)](https://github.com/eneo-ai/eneo/pull/814) | E | <Badge text="Kvar" variant="default" /> |
 
-**På GitHub:** det som är kvar finns i epicen [#1425](https://github.com/eneo-ai/eneo/issues/1425), som har elva uppgifter. G0 ([#1426](https://github.com/eneo-ai/eneo/issues/1426)) har landat men står ännu öppen där; tabellen [Underärenden på GitHub](#underärenden-på-github) längre ned visar dem med sitt tillstånd. De har samma form som MFA-uppgifterna, och ordningen är satt som "blockeras av". Det som redan är byggt ligger under [#549](https://github.com/eneo-ai/eneo/issues/549) ([#1384](https://github.com/eneo-ai/eneo/issues/1384), [#1388](https://github.com/eneo-ai/eneo/issues/1388), [#1394](https://github.com/eneo-ai/eneo/issues/1394), [#1408](https://github.com/eneo-ai/eneo/issues/1408)), och synken är [#1420](https://github.com/eneo-ai/eneo/pull/1420). Ordningen före eneo-test: filens ursprung (steg 1.5) landade 23 november ([#1509](https://github.com/eneo-ai/eneo/pull/1509)). Sedan landar del 1 av flödets tid ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) i Flödes-grenen, efter livetexten. Läsbara granskningsrader för gallringen, med namnen på space och flöde samt gammalt och nytt antal dagar, kommer i en egen liten PR direkt efter. Därefter del 2 av flödets tid (påslaget och den schemalagda borttagningen), städningen av rester, källjudet och provet genom modulen; hela ordningen står under [Ta över arbetet](/). Egna tider per steg kommer enligt planen efter piloten; frågan väntar på beslut. Taket för samtal, bilagenamnen och insiktschatten kommer före produktion.
+**På GitHub:** det som är kvar finns i epicen [#1425](https://github.com/eneo-ai/eneo/issues/1425), som har elva uppgifter. G0 ([#1426](https://github.com/eneo-ai/eneo/issues/1426)) har landat men står ännu öppen där; tabellen [Underärenden på GitHub](#underärenden-på-github) längre ned visar dem med sitt tillstånd. De har samma form som MFA-uppgifterna, och ordningen är satt som "blockeras av". Det som redan är byggt ligger under [#549](https://github.com/eneo-ai/eneo/issues/549) ([#1384](https://github.com/eneo-ai/eneo/issues/1384), [#1388](https://github.com/eneo-ai/eneo/issues/1388), [#1394](https://github.com/eneo-ai/eneo/issues/1394), [#1408](https://github.com/eneo-ai/eneo/issues/1408)), och synken är [#1420](https://github.com/eneo-ai/eneo/pull/1420). Ordningen före eneo-test: filens ursprung (steg 1.5) landade 23 november ([#1509](https://github.com/eneo-ai/eneo/pull/1509)). Sedan gäller ordningen under [Första versionen i Flöden](#första-versionen-i-flöden): del 1 av flödets tid ([#1513](https://github.com/eneo-ai/eneo/pull/1513)), Leverans och livetext landar i Flödes-grenen var för sig, en riktig körning provas för hand, del 2 gör borttagningen automatisk, och första versionen provas på en separat testserver. Efter testet kommer ljudets egen tid, personliga space, en överblick per resurs och tid per steg, i den ordningen, och därefter de övriga stegen före eneo-test. Läsbara granskningsrader för gallringen, med namnen på space och flöde samt gammalt och nytt antal dagar, kommer i en egen liten PR. Taket för samtal, bilagenamnen och insiktschatten kommer före produktion.
 
 ## Beslut
 
 ### 5. En gallringstid per nivå, utan lägen
 
-**Det betyder:** Tiden på ett space gäller både samtal och flöden i spacet. Flöde och steg kan korta den. Ljudets tid väljs på flödet: direkt när körningen är klar, när det sista steget som behöver ljudet är klart, eller ett antal timmar efter körningen. Utan val följer ljudet körningens tid. Har något en tid tas det bort automatiskt; utan tid börjar ingen gallring efter ålder. Städning av rester gäller ändå, och en kopia vars källa redan är borttagen tas bort.
+**Det betyder:** Tiden på ett space gäller både samtal och flöden i spacet. Flöde och steg kan korta den. Ljudets tid väljs på flödet: direkt när körningen är klar, när det sista steget som behöver ljudet är klart, eller ett antal timmar efter körningen. Utan val följer ljudet körningens tid. I första versionen följer ljudet och filerna alltid körningen; ljudets egen tid kommer efter testet. Har något en tid tas det bort automatiskt; utan tid börjar ingen gallring efter ålder. Städning av rester gäller ändå, och en kopia vars källa redan är borttagen tas bort.
 
 **Pris:** Det finns inget läge där innehåll bevaras och rensas för hand, och inget godkännande före gallring.
 
-**Äldre innehåll:** För samtal gäller en ny eller kortad tid också det som redan är äldre än tiden, räknat från när innehållet skapades. Så räknar Eneo i dag, och så gör Microsoft 365, Slack och Google Workspace. Den som sparar en ny eller kortad tid för samtal ska först se hur mycket som berörs och bekräfta; det byggs med taket för samtal (G5). I Flöden berörs bara körningar som startar efter att gallringen slogs på i spacet; körningar från före påslaget rörs inte. Påslaget visar därför inget antal och kräver ingen bekräftelse. En kortad tid gäller också det i de körningarna som redan är äldre än tiden, räknat från när innehållet skapades och för transkriptet från när transkriberingen först blev klar, och den får en enkel varning.
+**Äldre innehåll:** För samtal gäller en ny eller kortad tid också det som redan är äldre än tiden, räknat från när innehållet skapades. Så räknar Eneo i dag, och så gör Microsoft 365, Slack och Google Workspace. Den som sparar en ny eller kortad tid för samtal ska först se hur mycket som berörs och bekräfta; det byggs med taket för samtal (G5). I Flöden är spacets tid påslaget, och bara körningar som startar medan spacet har en tid berörs; körningar från före påslaget rörs inte. För flödeskörningarna visar sparandet därför inget antal och kräver ingen bekräftelse. En mening visas när tiden sparas. En kortad tid gäller också de berörda körningar som redan är äldre än tiden, och den får en varning.
 
 ### 6. Återställningens gräns står öppet i löftet
 
@@ -190,7 +247,7 @@ En återställning tar också tillbaka reglerna som gällde då. Efter en åters
 
 ## Underärenden på GitHub
 
-Uppgifterna skrevs före tre senare beslut, och där de skiljer sig gäller den här sidan. Uppgraderingen tar inte bort något. Bara körningar som startar efter att en administratör i spacet har slagit på gallringen tas bort automatiskt, och påslaget visar inget antal och kräver ingen bekräftelse. Det som fortfarande väntar på beslut står på sidan [Ta över arbetet](/#beslut-som-väntar). Ingen roll får gallringsbehörigheterna automatiskt. Ljudet kan också tas bort när det sista steget som behöver det är klart. Uppgifterna rättas när deras uppdrag skrivs.
+Uppgifterna skrevs före senare beslut, och där de skiljer sig gäller den här sidan. Uppgraderingen tar inte bort något som redan finns. Att sätta spacets tid är påslaget för alla resurser, också Flöden, så ett space som redan har en tid för samtal börjar gallra flödeskörningar som startar efter uppgraderingen. Bara körningar som startar medan spacet har en tid tas bort automatiskt, och för flödeskörningarna visar sparandet inget antal och kräver ingen bekräftelse. Det som fortfarande väntar på beslut står på sidan [Ta över arbetet](/#beslut-som-väntar). Ingen roll får gallringsbehörigheterna automatiskt. I första versionen tas ljudet bort med körningen; ljudets egen tid kommer efter testet. Uppgifterna rättas när deras uppdrag skrivs.
 
 <Underarenden epic={1425} />
 

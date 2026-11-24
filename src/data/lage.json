@@ -1,11 +1,11 @@
 {
-  "hamtad": "2026-11-24T13:30+01:00",
-  "github_hamtad": "2026-11-24T13:30+01:00",
+  "hamtad": "2026-11-24T14:33+01:00",
+  "github_hamtad": "2026-11-24T14:33+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
       "klara": 7,
-      "totalt": 26,
+      "totalt": 27,
       "nasta": "Kärnans besked när en körning eller en del av den är borttagen",
       "pausad": null
     },
@@ -68,6 +68,11 @@
   ],
   "pagar": [
     {
+      "rubrik": "GALLR-3 del 2: körningar och deras filer gallras automatiskt efter spacets och flödets tid",
+      "lage": "Körningar i Flöden och deras filer (ljud, pdf och skapade dokument) tas bort automatiskt när spacets eller flödets tid har gått. Det går inte att återställa. Arbetet har börjat.",
+      "vantar": "kartläggningen och mätningen."
+    },
+    {
       "rubrik": "Redigeraren, resten",
       "lage": "Flödesredigeraren får en egen del för leveransen av körningens resultat. Den är granskad och väntar på ett sista beslut.",
       "vantar": "ett beslut om en känd begränsning."
@@ -79,18 +84,18 @@
     },
     {
       "rubrik": "Reglerna för gallring i Flöden som körbara exempel, kantfallen och mätningen av en riktig körning",
-      "lage": "Reglerna för gallring per space, flöde och steg är provade mot kärnans befintliga regel och granskade i tre omgångar som letade kantfall. Ordningen för bygget är bestämd; det som återstår här är att mäta en riktig körning.",
-      "vantar": "rättat manus och att provstacken blir ledig."
+      "lage": "En riktig körning med tal till text mäts och tas bort för hand, för att visa att filerna verkligen försvinner.",
+      "vantar": "mätningen."
     },
     {
       "rubrik": "Dagar på organisation, space och flöde med spacet som tak; körningar tas bort när tiden har gått",
-      "lage": "Gallring del 1 för Flöden: varje flöde kan få en egen tid för hur länge körningarnas historik sparas, med spacets tid som tak. Den granskas nu en sista gång.",
-      "vantar": "den sista granskningen och de automatiska kontrollerna."
+      "lage": "Gallring del 1 för Flöden: varje flöde kan få en egen tid för hur länge körningarnas historik sparas, med spacets tid som tak. Den granskas en sista gång.",
+      "vantar": "den sista granskningen och ett beslut om en mening i guiden."
     },
     {
       "rubrik": "Livetext: Eneo kontrollerar servern, inte leverantörstypen, och visar administratören vägen",
-      "lage": "Livetext går att använda via en egen gateway för OpenAI, och administratören ser varför en modell inte kan användas och vad som behöver ändras. Den granskas en sista gång.",
-      "vantar": "den sista granskningen och de automatiska kontrollerna."
+      "lage": "Livetext går att använda via en egen gateway för OpenAI, och administratören ser varför en modell inte kan användas och vad som behöver ändras. En sista liten rättning pågår.",
+      "vantar": "rättningen."
     },
     {
       "rubrik": "Körningssidan, Skicka igen och utskickets historik",
@@ -117,11 +122,6 @@
     {
       "rubrik": "Hur den som tar över får ärendelistan",
       "text": "I dag finns ärendelistan bara lokalt hos den som leder arbetet. Förslaget är en privat kopia som den som tar över uppdaterar själv.",
-      "prioritet": 1
-    },
-    {
-      "rubrik": "fyra val för första versionen",
-      "text": "En första version av gallringen i Flöden är planerad och granskad. Fyra val om vad den ska omfatta väntar på beslut.",
       "prioritet": 1
     },
     {

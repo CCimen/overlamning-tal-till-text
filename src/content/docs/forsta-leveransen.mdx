@@ -13,7 +13,9 @@ Vad som byggs om i Flöden före eneo-test, vad som ska vara klart innan eneo-te
 
 <Badge text="Pågår" variant="caution" /> Eneo-test uppgraderas med en låst avbild från Flödes-grenen, utan MFA och utan release. 1.1, 1.2, 1.2b, 1.5 och 1.14 (stegen i stegkartan nedan) har landat, liksom gallringens delade värden och synken av develop in i Flödes-grenen: filerna i Flöden bär sedan 23 november uppgift om var de kom ifrån ([#1509](https://github.com/eneo-ai/eneo/pull/1509)). Modulen finns i version 0.1.32, som visar var körningens resultat står när det skickas till en mottagare, och avbilden från Flödes-grenen är ombyggd med synken.
 
-Tre ändringar är i sina sista granskningar och landar i Flödes-grenen var för sig när de är klara: livetext genom en organisations egen gateway ([#1514](https://github.com/eneo-ai/eneo/pull/1514)), gallringens första del ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och redigerarens andra del, avsnittet Leverans ([#1508](https://github.com/eneo-ai/eneo/pull/1508)). Gallringens första del gör spacets tid till tak för flödena, ett flöde kan välja en kortare tid, och tiden ändras av den som är administratör i spacet och har gallringsbehörigheten på sin roll.
+Tre ändringar är i sina sista granskningar och landar i Flödes-grenen var för sig när de är klara: livetext genom en organisations egen gateway ([#1514](https://github.com/eneo-ai/eneo/pull/1514)), gallringens första del ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och redigerarens andra del, avsnittet Leverans ([#1508](https://github.com/eneo-ai/eneo/pull/1508)). Gallringens första del gör spacets tid till tak för flödena, ett flöde kan välja en kortare tid, och tiden ändras av den som är administratör i spacet och har gallringsbehörigheten på sin roll. Att sätta spacets tid är påslaget; Flöden har inget eget påslag.
+
+**Första versionen av gallringen i Flöden** beslutades 24 november och står samlad under [Gallring](/gallring/#första-versionen-i-flöden). Efter de tre ändringarna mäts en riktig körning med tal till text och tas bort för hand i en provmiljö. Sedan gör gallringens andra del borttagningen automatisk, och körningens filer tas bort med körningen. Första versionen provas på en separat testserver, inte på eneo-test. Ljudets egen, kortare tid, personliga space, en överblick per resurs och tid per steg kommer efter testet. Därefter kommer de övriga stegen före eneo-test.
 
 Sex ändringar har landat i develop sedan den senaste synken och kommer till Flödes-grenen med nästa. Version 2.3.3 kom ut 23 november, utan Flöden. Under tiden ska teamet prova Flöden och tal till text i sina standups på en egen server som sätts upp, utan gallring. Produktionen kommer efter space, ägande och MFA; låst avbild eller release är inte bestämt, och tidpunkt 3 gäller bara vid en release.
 
@@ -21,7 +23,7 @@ Sex ändringar har landat i develop sedan den senaste synken och kommer till Fl�
 
 1. **Körningarnas kärna i Flöden är väl byggd och står kvar.** Delningen mellan utkast, fryst version och körning, nycklarna som håller organisationen rätt, och utlådorna som inte tappar något.
 2. **Skulden ligger i sömmarna mot kärnan.** Flöden har på minst sju ställen en egen variant av en regel som kärnan äger, och bär stegens och byggchattens inställningar på dolda assistentrader.
-3. **Flöden gallras av kärnans gallringsmotor, inte av en egen.** Körningarnas tid väljs för spacet och flödet, med spacet som tak. En administratör i spacet slår på gallringen, och bara körningar som startar därefter tas bort. Ljudet kan få en kortare tid; egna tider per steg kommer efter piloten. Inget innehåll gallras förrän någon har valt en tid. Rester som aldrig blev en körning städas efter 24 timmar som standard, en tid som organisationen kan ändra eller stänga av, och ett borttaget flöde slutstädas. Flöden får ingen egen schemaläggare.
+3. **Flöden gallras av kärnans gallringsmotor, inte av en egen.** Spacets tid är taket för alla resurser i spacet, också Flöden, och att sätta tiden är påslaget. Ett flöde kan välja en kortare tid. Bara körningar som startar medan spacet har en tid tas bort, och deras filer tas bort med dem. Ljudets egen, kortare tid och egna tider per steg kommer efter testet av första versionen. Inget innehåll gallras förrän någon har valt en tid. Rester som aldrig blev en körning städas efter 24 timmar som standard, en tid som organisationen kan ändra eller stänga av, och ett borttaget flöde slutstädas. Flöden får ingen egen schemaläggare.
 4. **Spacets roll avgör vad man får göra med ett flöde,** ovanpå kontots behörighet för Flöden. Flödets personliga ägare försvinner.
 5. **Migrationskedjan behålls.** Teamets egen server, som sätts upp, ska köra Flödes-grenen på en databas som ska behållas, så schemat ändras med revisioner framåt, och [steg 1.9](#steg-1-9) görs inte före piloten.
 6. **Fyra tidpunkter styr ordningen:** före den första databasen, före de första användarna, före develop (bara om produktionen blir en release) och före känsligt material. Stegen före eneo-test står under [Tidpunkt 1](#tidpunkt-1-före-den-första-databasen).
@@ -66,17 +68,25 @@ Ja, i sin kärna. Det som bör byggas om ligger nästan helt där Flöden lutar 
 
 ## Tidpunkt 1: före den första databasen
 
-Ändringarna i kod landar en i taget, i den här ordningen, innan eneo-test uppgraderas. Två av dem, egna tider per steg (G3) och en ren migrationsgrund (1.9), väntar till efter piloten. Gallringen går först. Sedan provas uppgraderingen och driften (1.10 till 1.15). Efter varje steg körs hela testsviten och samma prov i en egen stack; slutar något fungera som fungerade förut stannar arbetet där. Öppna ett steg för detaljerna.
+Ändringarna i kod landar en i taget, i den här ordningen, innan eneo-test uppgraderas. Gallringens första version går först och provas på en separat testserver. Efter testet kommer i tur och ordning ljudets egen tid (2.4), personliga space, en överblick per resurs i spacets inställningar och tid per steg (G3), och därefter de övriga stegen före eneo-test. Resterna (2.3) och provet genom modulen har ingen bestämd plats i den ordningen. En ren migrationsgrund (1.9) väntar till efter piloten. Sist provas uppgraderingen och driften (1.10 till 1.15). Efter varje steg körs hela testsviten och samma prov i en egen stack; slutar något fungera som fungerade förut stannar arbetet där. Öppna ett steg för detaljerna.
 
 <figure class="sparbild stegkarta not-content" aria-labelledby="stegkarta">
-	<figcaption id="stegkarta">Stegen före eneo-test, i landningsordning, och de två som väntar till efter piloten</figcaption>
+	<figcaption id="stegkarta">Stegen före eneo-test i landningsordning, det som saknar bestämd plats, och det som väntar till efter piloten</figcaption>
 	<div class="spar klar">
 		<p class="spar-namn">Landat</p>
 		<ul class="spar-steg fria"><li><a href="#steg-1-1"><b>1.1</b> Synken blir grön och mergas</a></li><li><a href="#steg-1-2"><b>1.2</b> De fyra migrationerna och rollmallarna rättas</a></li><li><a href="#steg-1-2b"><b>1.2b</b> Flöden slås på i administrationen</a></li><li><a href="#steg-1-5"><b>1.5</b> Filens ägare och ursprung</a></li><li><a href="#steg-1-14"><b>1.14</b> En ny utgåva av modulen, och rättningen av ordens tider</a></li></ul>
 	</div>
 	<div class="spar nu">
-		<p class="spar-namn">Nu: gallring</p>
-		<ol class="spar-steg"><li><a href="#steg-1-3"><b>1.3</b> Gallringens form i schemat och regeln</a></li><li><a href="#steg-2-3"><b>2.3</b> Rester städas</a></li><li><a href="#steg-2-4"><b>2.4</b> Ljudet släpps, körningen står kvar</a></li><li><a href="#steg-prov"><b>Prov</b> Provet genom modulen</a></li></ol>
+		<p class="spar-namn">Nu: gallringens första version</p>
+		<ol class="spar-steg"><li><a href="#steg-1-3"><b>1.3</b> Gallringens form i schemat och regeln, i två delar</a></li><li><a href="#steg-1-3"><b>Test</b> Första versionen provas på en separat testserver</a></li></ol>
+	</div>
+	<div class="spar">
+		<p class="spar-namn">Efter testet</p>
+		<ol class="spar-steg"><li><a href="#steg-2-4"><b>2.4</b> Ljudet får en egen tid</a></li><li><a href="#steg-g3"><b>G3</b> Ett steg får en egen tid</a></li></ol>
+	</div>
+	<div class="spar">
+		<p class="spar-namn">Utan bestämd plats</p>
+		<ul class="spar-steg fria"><li><a href="#steg-2-3"><b>2.3</b> Rester städas</a></li><li><a href="#steg-prov"><b>Prov</b> Provet genom modulen</a></li></ul>
 	</div>
 	<div class="spar">
 		<p class="spar-namn">Städning i Flöden</p>
@@ -88,7 +98,7 @@ Ja, i sin kärna. Det som bör byggas om ligger nästan helt där Flöden lutar 
 	</div>
 	<div class="spar">
 		<p class="spar-namn">Efter piloten</p>
-		<ol class="spar-steg"><li><a href="#steg-g3"><b>G3</b> Ett steg får en egen tid</a></li><li><a href="#steg-1-9"><b>1.9</b> En ren migrationsgrund</a></li></ol>
+		<ol class="spar-steg"><li><a href="#steg-1-9"><b>1.9</b> En ren migrationsgrund</a></li></ol>
 	</div>
 </figure>
 
@@ -131,7 +141,11 @@ _Se delen [Filerna](#filerna)._
 <details id="steg-1-3">
 <summary><strong>1.3</strong> Gallringens form i schemat och regeln<br /><small>Flödes-grenen</small></summary>
 
-Flödets körningar anmäls som en regel i kärnans gallringsmotor, med nivåerna organisation, space och flöde och med spacets vanliga tid som tak. Lägena försvinner. Den manuella rensningen står kvar. Beslutat 2026-11-23: en administratör i spacet slår på gallringen, och bara körningar som startar därefter tas bort. Körningar som fanns innan rörs inte, så påslaget behöver ingen förhandsräkning och ingen bekräftelse. Steget byggs i två delar: den första ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) byter regeln och väntar på sin slutgranskning, och den andra för in den schemalagda borttagningen av hela körningar.
+Flödets körningar anmäls som en regel i kärnans gallringsmotor, med nivåerna space och flöde och med spacets vanliga tid som tak. Lägena försvinner. Den manuella rensningen står kvar. Beslutat 24 november: spacets tid är taket för alla resurser i spacet, också Flöden, och att sätta tiden är påslaget. Ett flöde utan egen tid får spacets tid. Bara körningar som startar medan spacet har en tid märks och tas bort; körningar som fanns innan rörs inte. Ett space som redan har en tid för samtal börjar alltså gallra de flödeskörningar som startar efter uppgraderingen.
+
+Steget byggs i två delar. Den första ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) byter regeln och väntar på sin slutgranskning. Innan den andra delen beskrivs färdigt mäts en riktig körning med tal till text och tas bort för hand i en provmiljö, för att visa att filernas innehåll är borta i lagringen. Den andra delen gör borttagningen automatisk: körningen märks när den startar, och en uppgift i kärnans gallringsmotor tar var femte minut bort märkta körningar vars tid har gått. Filerna följer körningen: ljud, pdf, skapade dokument och livetext tas bort i samma steg. En fil som en annan körning fortfarande använder står kvar tills den sista användningen är borta. En spärrad körning står kvar, och en körning som är för stor eller fallerar prövas igen utan att stoppa resten. Spacets inställningar säger att tiden gäller alla resurser, också Flöden, och varnar när tiden kortas.
+
+Därefter provas första versionen på en separat testserver med en avbild från Flödes-grenen, inte på eneo-test. Personliga space får ingen automatisk gallring i första versionen.
 
 _Se delen [Gallringen](#gallringen)._
 
@@ -149,20 +163,20 @@ Uppgift på GitHub: [#1427](https://github.com/eneo-ai/eneo/issues/1427).
 </details>
 
 <details id="steg-2-4">
-<summary><strong>2.4</strong> Ljudet släpps, körningen står kvar<br /><small>Flödes-grenen</small></summary>
+<summary><strong>2.4</strong> Ljudet får en egen tid<br /><small>Flödes-grenen, efter testet</small></summary>
 
-Den som bygger flödet kan välja att ljudet tas bort direkt när körningen är klar, efter ett antal timmar, eller så snart det sista steget som behöver ljudet är klart. Utan ett val står ljudet kvar lika länge som körningen. Transkript och dokument finns kvar, och ljudet står kvar så länge någon körning använder det. Uppgiften körs av kärnans gallringsmotor.
+I första versionen tas ljudet bort med körningen, när körningens tid har gått. Efter testet får ljudet en egen, kortare tid: den som bygger flödet kan välja att ljudet tas bort direkt när körningen är klar, efter ett antal timmar, eller så snart det sista steget som behöver ljudet är klart. Utan ett val står ljudet kvar lika länge som körningen. Transkript och dokument finns kvar, och ljudet står kvar så länge någon körning använder det. Uppgiften körs av kärnans gallringsmotor.
 
-_Det här är den basala gallringen av ljudfilen._
+_Steget ger ljudet en tid som är kortare än körningens._
 
 Uppgift på GitHub: [#1431](https://github.com/eneo-ai/eneo/issues/1431).
 
 </details>
 
 <details id="steg-g3">
-<summary><strong>G3</strong> Ett steg får en egen tid<br /><small>Flödes-grenen, efter piloten</small></summary>
+<summary><strong>G3</strong> Ett steg får en egen tid<br /><small>Flödes-grenen, efter testet</small></summary>
 
-Beslutat 2026-11-23: den första versionen har en tid för hela körningen; egna tider per steg kommer efter piloten.
+Den första versionen har en tid för hela körningen. Egna tider per steg kommer efter testet av första versionen, efter ljudets egen tid, personliga space och en överblick per resurs i spacets inställningar.
 
 En tid per steg, i timmar, under flödets och spacets tak. När tiden har gått tas stegets innehåll och dess kopior i körningen bort.
 
@@ -174,6 +188,8 @@ Uppgift på GitHub: [#1430](https://github.com/eneo-ai/eneo/issues/1430).
 <summary><strong>Prov</strong> Provet genom modulen<br /><small>Flödes-grenen och modulen</small></summary>
 
 Ljud och transkript är borta också i modulens, talaridentifieringens och transkriberingens kopior, också efter en avbruten process, och varje del ger ett entydigt besked om vad som är borttaget. Word-dokumentet och dess kopior följer sin egen regel.
+
+Provet ingår inte i första versionen, och modulen ändras inte för testet. Testguiden räknar i stället upp de kända kopiorna utanför kärnan: ord som webbläsaren har sparat, inspelningar på enheten, talaridentifieringens kopia som finns kvar i 72 timmar, och databasens säkerhetskopior tills de har åldrats ut.
 
 </details>
 
@@ -491,17 +507,17 @@ Flödet blir en nivå i kärnans gemensamma regel från början, så att inga v�
 
 #### Lösningen
 
-- Schemat och regeln i beslutad form nu: flödet har egna dagar, spacets vanliga tid är tak, organisationens tid gäller när dess brytare är på. Lägena och de separata fälten tas bort. Kärnans nivåer har redan flödet; ingen regel använder den nivån än.
+- Schemat och regeln i beslutad form nu: flödet har egna dagar, och spacets vanliga tid är tak. Organisationen är ingen nivå för Flöden. Lägena och de separata fälten tas bort. Kärnans nivåer har redan flödet; ingen regel använder den nivån än.
 - Allt som tas bort enligt schema körs av kärnans gallringsmotor, och Flöden får ingen egen schemaläggare. Motorn har tre former för en uppgift, och varje borttagning får den som passar. Inga nya gallringsfält där inget val behövs.
-- Hela körningar: valda per organisation, space och flöde, i dagar, med spacet som tak.
+- Hela körningar: valda per space och flöde, i dagar, med spacet som tak.
 - Rester: efter 24 timmar som standard; organisationen kan ändra tiden eller stänga av städningen.
-- Ljudets släpp: valt på flödet, direkt, i timmar efter körningens slut, eller när det sista steget som behöver ljudet är klart.
-- Steget: en tid per steg i timmar, under flödets och spacets tak. Kommer efter piloten.
-- Utan ett val gallras inget. En administratör i spacet slår på gallringen, och bara körningar som startar därefter tas bort. Körningar som fanns innan rörs inte, så påslaget behöver ingen förhandsräkning och ingen bekräftelse.
+- Ljudets egen tid: valt på flödet, direkt, i timmar efter körningens slut, eller när det sista steget som behöver ljudet är klart. Kommer efter testet; i första versionen tas ljudet bort med körningen.
+- Steget: en tid per steg i timmar, under flödets och spacets tak. Kommer efter testet.
+- Utan en tid gallras inget. Spacets tid är taket för alla resurser i spacet, också Flöden, och att sätta tiden är påslaget. Bara körningar som startar medan spacet har en tid tas bort. Körningar som fanns innan rörs inte, så påslaget behöver ingen förhandsräkning och ingen bekräftelse.
 - Slutstädningen av ett borttaget flöde: följer borttagningen, utan tidsval.
 - Flödens egen kod för att ta bort en körning med allt dess innehåll står kvar som det motorns uppgift anropar. Den manuella rensningen använder samma kod och står kvar utan läge, så att en körning alltid går att ta bort.
-- Att ändra en tid kräver gallringsbehörigheten oavsett väg, som redan är beslutat. Spacets tid ändras av den som är administratör i spacet och har gallringsbehörigheten på sin roll. En tid som spacet redan har för samtal startar ingenting i Flöden förrän gallringen slås på.
-- Före eneo-tests uppgradering: hela körningar med påslaget och den schemalagda borttagningen, städningen av rester och ljudets släpp. Stegets tid kommer efter piloten. Slutstädningen av borttagna flöden kommer före de första användarna.
+- Att ändra en tid kräver gallringsbehörigheten oavsett väg, som redan är beslutat. Spacets tid ändras av den som är administratör i spacet och har gallringsbehörigheten på sin roll. Ett space som redan har en tid för samtal börjar gallra de flödeskörningar som startar efter uppgraderingen.
+- Första versionen: hela körningar med sina filer, påslaget och den schemalagda borttagningen, provade på en separat testserver. Efter testet: ljudets egen tid, personliga space, en överblick per resurs och stegets tid, i den ordningen. Resterna har ingen bestämd plats i den ordningen. Slutstädningen av borttagna flöden kommer före de första användarna.
 
 #### Varför den är bättre
 
@@ -813,7 +829,7 @@ De sex första gäller ombyggnaden. "Gäller" betyder att rekommendationen följ
 | Gäller | Vilket material får verksamheterna lägga in innan MFA och hela gallringen finns? | Bara material som inte är sekretess eller känsliga personuppgifter enligt er egen klassning. Det sägs i inbjudan. |
 | Gäller | Bjuds verksamheterna in först när ljudet kan tas bort automatiskt efter en vald tid? | Ja. |
 | Gäller | Vilka regler gäller för migrationerna efter eneo-tests första uppgradering? | Databasens migrations-id antecknas efter varje driftsättning, och en körd migration ändras aldrig. |
-| Gäller | Får ljudets släpp byggas före den schemalagda borttagningen av hela körningar? | Ja, men ordningen sätter flödets tid (1.3) först, sedan resterna (steg 2.3) och ljudet (steg 2.4). |
+| Gäller | Får ljudets egen tid byggas före den schemalagda borttagningen av hela körningar? | Nej. Hela körningar med sina filer kommer först (1.3), sedan testet av första versionen, sedan ljudets egen tid (steg 2.4). |
 | Öppen | Gäller kraven på full gallring och MFA också för att ta in Flöden vilande i develop? | Nej. Där gäller att inget märks när Flöden är av. Gallring och MFA gäller för känsligt material. |
 | Gäller | Vem slår på Flöden, och får Owner-rollen behörigheterna av sig själv? | **Beslutat:** ett reglage under Admin > Inställningar (landat). Inga behörigheter delas ut automatiskt. Raden visar om arbetarna kör och varnar när de inte gör det; ett tydligt fel för den som startar en körning utan arbetare är inte byggt än. |
 | Gäller | Ska uppladdningsgränserna höjas för installationer som inte valt det? | **Beslutat:** nej. Gränserna ställs in i administrationen, och ingen migration höjer dem. |

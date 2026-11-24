@@ -1,10 +1,10 @@
 {
-  "hamtad": "2026-11-24T14:57+01:00",
-  "github_hamtad": "2026-11-24T14:57+01:00",
+  "hamtad": "2026-11-24T15:15+01:00",
+  "github_hamtad": "2026-11-24T15:15+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
-      "klara": 7,
+      "klara": 8,
       "totalt": 27,
       "nasta": "Kärnans besked när en körning eller en del av den är borttagen",
       "pausad": null
@@ -78,14 +78,9 @@
       "vantar": "rättningen av köns avstängning, som går först."
     },
     {
-      "rubrik": "Reglerna för gallring i Flöden som körbara exempel, kantfallen och mätningen av en riktig körning",
-      "lage": "En riktig körning med tal till text mäts och tas bort för hand, för att visa att filerna verkligen försvinner.",
-      "vantar": "mätningen."
-    },
-    {
       "rubrik": "Dagar på organisation, space och flöde med spacet som tak; körningar tas bort när tiden har gått",
-      "lage": "Gallring del 1 för Flöden: varje flöde kan få en egen tid för hur länge körningarnas historik sparas, med spacets tid som tak. Den granskas en sista gång.",
-      "vantar": "den sista granskningen och ett beslut om en mening i guiden."
+      "lage": "Gallring del 1 för Flöden har landat: spacets tid är taket, ett flöde kan välja en kortare tid, och en längre nekas. Den automatiska borttagningen kommer i nästa steg.",
+      "vantar": "briefen för del 2."
     },
     {
       "rubrik": "Livetext: Eneo kontrollerar servern, inte leverantörstypen, och visar administratören vägen",

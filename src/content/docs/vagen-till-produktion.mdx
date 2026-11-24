@@ -276,14 +276,14 @@ Varje rad är ett spår. Inom ett spår landar en PR i taget, i pilarnas ordning
     </ol>
   </div>
   <div class="lane">
-    <div class="lane-name">Gallring<small>krav D och E, först i Flöden; G1, G0 och 1.5 klara</small></div>
+    <div class="lane-name">Gallring<small>krav D och E, först i Flöden; G1, G0, 1.5 och del 1 av 1.3 klara</small></div>
     <ol>
       <li><span class="box"><span class="id">G1</span>Täta körningar i kärnan</span></li>
       <li><span class="box"><span class="id">G0</span>Stegnivåns namn och felet över taket</span></li>
       <li><span class="box"><span class="id">1.5</span>Filens ursprung</span></li>
-      <li><span class="box"><span class="id">1.3</span>Del 1: tiderna (#1513)</span></li>
-      <li><span class="box">En riktig körning mäts och tas bort för hand</span></li>
-      <li><span class="box"><span class="id">1.3</span>Del 2: borttagningen blir automatisk</span></li>
+      <li><span class="box"><span class="id">1.3</span>Del 1: tiderna (#1513), landad 24 november</span></li>
+      <li><span class="box">Provet för hand, gjort 24 november</span></li>
+      <li><span class="box"><span class="id">1.3</span>Nästa: del 2, borttagningen blir automatisk</span></li>
       <li><span class="box">Testet på en separat testserver</span></li>
       <li><span class="box"><span class="id">2.4</span>Ljudet får en egen, kortare tid</span></li>
       <li><span class="box">Personliga space</span></li>
@@ -335,7 +335,7 @@ Varje rad är ett spår. Inom ett spår landar en PR i taget, i pilarnas ordning
   </div>
 </div>
 
-- **Gallringen i Flöden går först i den första leveransen.** G1, G0 och filens ursprung (1.5, landat 23 november) är klara. Nästa är att flödets tid gäller (1.3), i två delar. Del 1 ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) är öppen och landar för sig, liksom livetext ([#1514](https://github.com/eneo-ai/eneo/pull/1514)). Redigerarens avsnitt Leverans ([#1508](https://github.com/eneo-ai/eneo/pull/1508)) landade 24 november. Sedan mäts en riktig körning med tal till text och tas bort för hand i en provmiljö, och del 2 gör borttagningen automatisk. Hela planen står under [Första versionen i Flöden](/gallring/#första-versionen-i-flöden) på sidan Gallring.
+- **Gallringen i Flöden går först i den första leveransen.** G1, G0 och filens ursprung (1.5, landat 23 november) är klara. Flödets tid (1.3) byggs i två delar. Del 1 ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och redigerarens avsnitt Leverans ([#1508](https://github.com/eneo-ai/eneo/pull/1508)) landade 24 november, och livetext ([#1514](https://github.com/eneo-ai/eneo/pull/1514)) är nu den enda av de tre ändringarna som är öppen. Provet för hand gjordes samma dag: en riktig körning togs bort i en provmiljö, och filernas innehåll var borta i lagringen. Nästa är del 2, som gör borttagningen automatisk; den är inte byggd. Hela planen står under [Första versionen i Flöden](/gallring/#första-versionen-i-flöden) på sidan Gallring.
 - **Att sätta spacets tid slår på gallringen.** Tiden är taket för alla resurser i spacet, också Flöden, och Flöden har inget eget påslag. Ett space som redan har en tid för samtal börjar gallra de flödeskörningar som startar efter uppgraderingen. Körningar från före påslaget rörs inte. Utan tid tas inget bort.
 - **I första versionen tas ljudet bort med körningen.** Ljudet och körningens andra filer tas bort när körningens tid har gått. En egen, kortare tid för ljudet kommer efter testet.
 - **Första versionen provas på en separat testserver, inte på eneo-test.** Efter testet kommer i tur och ordning ljudets egen tid, personliga space, en överblick per resurs i spacets inställningar och tid per steg. Därefter kommer de övriga stegen före eneo-test, som står under [Tidpunkt 1](/forsta-leveransen/#tidpunkt-1-före-den-första-databasen) på sidan Första leveransen, bland dem chattens modellkapacitet ([1.7](/forsta-leveransen/#steg-1-7)) och sist uppgraderingen och driften ([1.10–1.15](/forsta-leveransen/#steg-1-10)). Städningen av rester (2.3) och provet genom modulen har ingen bestämd plats i den ordningen.

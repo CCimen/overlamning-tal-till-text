@@ -13,9 +13,9 @@ import { Badge } from '@astrojs/starlight/components';
 
 - **Livetext** betyder att talet blir text på skärmen medan någon spelar in i ett flöde.
 - Livetext finns bara på Flödes-grenen. Den finns inte i develop och inte i någon utgåva; den senaste utgåvan är 2.3.3 från 23 november.
-- Den öppna ändringen [#1514](https://github.com/eneo-ai/eneo/pull/1514) gör att livetext fungerar genom en organisations egen gateway som är inlagd som en leverantör av typen OpenAI. En regel i Eneo avgör var livetext kan köras och säger varför när svaret är nej.
-- #1514 är nu den enda öppna av tre ändringar mot Flödes-grenen. De andra två, Leverans i flödesredigeraren ([#1508](https://github.com/eneo-ai/eneo/pull/1508)) och del 1 av gallringen i Flöden ([#1513](https://github.com/eneo-ai/eneo/pull/1513)), landade 24 november.
-- Med #1514 heter det bara **Livetext** (på engelska Live text) i React-appen (web-next).
+- Ändringen [#1514](https://github.com/eneo-ai/eneo/pull/1514) landade i Flödes-grenen 24 november. Den gör att livetext fungerar genom en organisations egen gateway som är inlagd som en leverantör av typen OpenAI. En regel i Eneo avgör var livetext kan köras och säger varför när svaret är nej.
+- Alla tre ändringarna mot Flödes-grenen landade 24 november: Leverans i flödesredigeraren ([#1508](https://github.com/eneo-ai/eneo/pull/1508)), del 1 av gallringen i Flöden ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och livetext (#1514).
+- Sedan #1514 heter det bara **Livetext** (på engelska Live text) i React-appen (web-next).
 
 ## Vad användaren får
 
@@ -32,32 +32,32 @@ Flöden finns bara i React-appen. Det som står på den här sidan gäller därf
 
 Webbläsaren skickar ljudet till Eneo, och Eneo skickar det vidare till en server för taligenkänning som talar vLLM:s realtids-API (`/v1/realtime`). Det kan till exempel vara transkriberingen (vadsa), som beskrivs på sidan [Modulen, kitet och taltjänsterna](/modulen/#transkriberingen).
 
-### Vad #1514 ändrar
+### Vad #1514 ändrade
 
-<Badge text="Öppen PR" variant="caution" />
+<Badge text="På Flödes-grenen" variant="note" />
 
 **Förut** avgjorde leverantörens typ allt: bara en leverantör av typen vLLM fick bära livetext. En gateway som talar samma realtids-API men är inlagd som en OpenAI-leverantör nekades. Då behövdes en andra leverantör, med egen nyckel och egen modell, för samma server.
 
-**Med #1514** frågar Eneo inte bara efter typen utan efter servern som leverantören pekar på. En leverantör kan bära livetext när den är påslagen, saknar utgående headers och är antingen
+**Nu** frågar Eneo inte bara efter typen utan efter servern som leverantören pekar på. En leverantör kan bära livetext när den är påslagen, saknar utgående headers och är antingen
 
 - av typen vLLM, med en adress, eller
 - av typen OpenAI, med en egen adress till en server som inte är OpenAI:s egen tjänst.
 
 En regel i backend avgör det, och samma regel används överallt där livetext erbjuds, sparas och startas. Webbappen visar backendens svar och har ingen egen kopia av regeln.
 
-### Vad administratören gör när #1514 har landat
+### Vad administratören gör
 
 1. Behåll gatewayens leverantör av typen OpenAI, och skriv gatewayens adress i leverantörens fält **Endpoint-URL**.
 2. Gå till **Admin → Modeller** och slå på **Livetext** för gatewayens modell för transkribering.
 
-Ingen andra leverantör, nyckel eller modell behövs. Tills #1514 har landat kan bara en leverantör av typen vLLM bära livetext.
+Ingen andra leverantör, nyckel eller modell behövs. Före #1514 kunde bara en leverantör av typen vLLM bära livetext.
 
-### Vad administratören ser när #1514 har landat
+### Vad administratören ser
 
 - **Går livetext inte att slå på** är rutan låst, och skälet står på en egen rad med fältens namn: adressen saknas eller går till OpenAI:s egen tjänst, typen stöds inte, leverantören har utgående headers, eller leverantören är avstängd. Den låsta rutan går att nå med tangentbordet, och skälet läses upp.
 - **Slutar en leverantör att uppfylla regeln** efter att en modell har markerats, till exempel för att adressen tas bort, behålls markeringen, men ingen ny session med livetext startar. Modellistan visar då **Livetext används inte** med skälet.
 - **När en sådan leverantör sparas** namnges de markerade modeller som berörs. När felet är rättat och leverantören sparas igen står det att livetext används igen.
-- Guiderna för transkribering, AI-leverantörer, driftsättning och Flöden får samma namn och samma steg i #1514.
+- Guiderna för transkribering, AI-leverantörer, driftsättning och Flöden har samma namn och samma steg sedan #1514.
 
 Den äldre administrationen i Svelte-appen behåller sin ruta "Livetranskribering" och sin strängare regel, som bara godtar typen vLLM. Den ändras inte, eftersom Flöden bara finns i React-appen.
 
@@ -68,10 +68,10 @@ Den äldre administrationen i Svelte-appen behåller sin ruta "Livetranskriberin
 | Livetext i flödets inspelning, i startdialogen i React-appen | Flödes-grenen | <Badge text="Klart" variant="success" /> |
 | En administratör slår på livetext för en modell hos en vLLM-leverantör | Flödes-grenen | <Badge text="Klart" variant="success" /> |
 | Ett flöde kan ha en egen modell för livetext | Flödes-grenen | <Badge text="Klart" variant="success" /> |
-| En gateway som är inlagd som OpenAI kan bära livetext, en regel avgör var, och namnet blir Livetext<br />[PR #1514](https://github.com/eneo-ai/eneo/pull/1514) | Mot Flödes-grenen | <Badge text="Öppen PR" variant="caution" /> |
+| En gateway som är inlagd som OpenAI kan bära livetext, en regel avgör var, och namnet blir Livetext<br />[PR #1514](https://github.com/eneo-ai/eneo/pull/1514) | På Flödes-grenen | <Badge text="Klart" variant="success" /> |
 | Livetext i develop eller i en utgåva | Inte påbörjat | <Badge text="Inte startad" variant="default" /> |
 
-#1514 är granskad och provad i webbläsaren. Den sista rättningen i administrationen av modeller är gjord, och ändringen genomgår den sista granskningen innan den slås ihop. Ändringen lägger till fält i API:t och bryter ingen utgåva, eftersom livetext inte finns i någon utgåva. På en server som redan kör Flödes-grenen kan en vLLM-leverantör med utgående headers inte längre bära livetext. Dess markerade modeller visas som **Livetext används inte** tills headers tas bort.
+#1514 granskades, provades i webbläsaren och landade i Flödes-grenen 24 november. Ändringen lägger till fält i API:t och bryter ingen utgåva, eftersom livetext inte finns i någon utgåva. På en server som redan kör Flödes-grenen kan en vLLM-leverantör med utgående headers inte längre bära livetext. Dess markerade modeller visas som **Livetext används inte** tills headers tas bort.
 
 ## Nästa
 
@@ -85,4 +85,4 @@ Inget av det här är startat. Ordningen efter #1514 är inte bestämd.
 
 ## Namnet
 
-Tills #1514 har landat använder Flödes-grenen tre olika namn: Livetranskribering, Direktinspelning och Livetext. Med #1514 ersätts de av **Livetext** (engelska: **Live text**). Använd **Livetext** i alla texter, ärenden och guider.
+Före #1514 användes tre olika namn på Flödes-grenen: Livetranskribering, Direktinspelning och Livetext. Sedan #1514 ersätts de av **Livetext** (engelska: **Live text**). Använd **Livetext** i alla texter, ärenden och guider.

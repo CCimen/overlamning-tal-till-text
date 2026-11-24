@@ -1,11 +1,11 @@
 {
-  "hamtad": "2026-11-24T15:15+01:00",
-  "github_hamtad": "2026-11-24T15:15+01:00",
+  "hamtad": "2026-11-24T15:54+01:00",
+  "github_hamtad": "2026-11-24T15:54+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
       "klara": 8,
-      "totalt": 27,
+      "totalt": 30,
       "nasta": "Kärnans besked när en körning eller en del av den är borttagen",
       "pausad": null
     },
@@ -61,16 +61,16 @@
     {
       "namn": "Livetext",
       "klara": 0,
-      "totalt": 1,
-      "nasta": null,
+      "totalt": 2,
+      "nasta": "En modellväljare vars första läsning pågår under en sparning får inte det nya svaret direkt",
       "pausad": null
     }
   ],
   "pagar": [
     {
       "rubrik": "GALLR-3 del 2: körningar och deras filer gallras automatiskt efter spacets och flödets tid",
-      "lage": "Körningar i Flöden och deras filer (ljud, pdf och skapade dokument) tas bort automatiskt när spacets eller flödets tid har gått. Det går inte att återställa. Arbetet har börjat.",
-      "vantar": "kartläggningen och mätningen."
+      "lage": "Körningar i Flöden och deras filer (ljud, pdf och skapade dokument) tas bort automatiskt när spacets eller flödets tid har gått. Det går inte att återställa. Beskrivningen av arbetet är skriven och granskas innan bygget börjar.",
+      "vantar": "granskningen av beskrivningen."
     },
     {
       "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",
@@ -84,8 +84,8 @@
     },
     {
       "rubrik": "Livetext: Eneo kontrollerar servern, inte leverantörstypen, och visar administratören vägen",
-      "lage": "Livetext går att använda via en egen gateway för OpenAI, och administratören ser varför en modell inte kan användas och vad som behöver ändras. En sista liten rättning pågår.",
-      "vantar": "rättningen."
+      "lage": "Livetext går att använda via en egen gateway för OpenAI, och administratören ser varför en modell inte kan användas och vad som behöver ändras. Ändringen är klar och genomgår den sista granskningen innan den slås ihop.",
+      "vantar": "den sista granskningen."
     },
     {
       "rubrik": "Körningssidan, Skicka igen och utskickets historik",

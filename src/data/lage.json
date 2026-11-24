@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-24T17:14+01:00",
-  "github_hamtad": "2026-11-24T17:14+01:00",
+  "hamtad": "2026-11-24T22:16+01:00",
+  "github_hamtad": "2026-11-24T22:16+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -69,13 +69,13 @@
   "pagar": [
     {
       "rubrik": "GALLR-3 del 2: körningar och deras filer gallras automatiskt efter spacets och flödets tid",
-      "lage": "Körningar i Flöden och deras filer (ljud, pdf och skapade dokument) tas bort automatiskt när spacets eller flödets tid har gått. Det går inte att återställa. Beskrivningen är granskad och klar, och bygget pågår.",
-      "vantar": "bygget."
+      "lage": "Körningar i flöden och deras filer tas bort automatiskt när ytans gallringstid har gått. Ändringen är byggd, granskad i tre omgångar och ligger nu som en pull request för en sista granskning.",
+      "vantar": "den automatiska granskningen på GitHub."
     },
     {
       "rubrik": "Inspelningen i React: tåligare vid nätavbrott under långa möten",
-      "lage": "Inspelningen i React-appen görs tåligare för långa möten: den ska fortsätta genom nätavbrott, och delar som inte gick att skicka ska skickas när nätet är tillbaka. Bygget pågår.",
-      "vantar": "bygget."
+      "lage": "Inspelningen i React-appen görs tåligare för långa möten: den ska fortsätta genom nätavbrott, och delar som inte gick att skicka ska skickas när nätet är tillbaka. Bygget är klart och granskas.",
+      "vantar": "granskningen."
     },
     {
       "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",

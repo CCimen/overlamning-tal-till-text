@@ -1,0 +1,176 @@
+---
+title: Modulen, kitet och taltjänsterna
+description: Läget för modulen för tal till text, modulkitet, talaridentifieringen (vemsa) och transkriberingen (vadsa), hur de hänger ihop med Eneo och vad som kommer härnäst.
+tableOfContents:
+  maxHeadingLevel: 2
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+<p><small>Modulen · kitet · vemsa · vadsa</small></p>
+
+## Kort sagt
+
+- **Modulen för tal till text** är ute i version [0.1.32](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.32) sedan 23 november. Den visar om ett flödes resultat skickas, är skickat eller inte kunde skickas. Inga landade ändringar väntar på en ny utgåva.
+- **Modulkitet** är ute i version [0.1.0](https://github.com/eneo-ai/eneo-module-kit/releases/tag/v0.1.0) sedan 8 november. Fyra ändringar har landat sedan dess men är inte utgivna, och två av dem är brytande. Modulen för tal till text använder ännu inte kitet.
+- **Talaridentifieringen (vemsa)** är ute i version [0.2.1](https://github.com/eneo-ai/vemsa/releases/tag/v0.2.1) sedan 21 november. Nästa stora del är att tjänstens kopia av ord och resultat tas bort när Eneo har sparat resultatet.
+- **Transkriberingen (vadsa)** gör tal till text. Den har ingen utgåva, och vem som äger den är inte bestämt.
+- **Kärnans besked när innehåll tas bort** är det kontrakt som modulen och talaridentifieringen ska följa. Det är beslutat att det skrivs tidigt, men det är inte påbörjat. Transkriberingen sparar inget efter anropet.
+- **Teamet** ska prova Flöden och modulen i sina standups på en egen server, skild från eneo-test.
+
+Modulen och taltjänsterna är egna program bredvid Eneo. Körningarna och det som sparas om dem finns i Eneo. Modulen och talaridentifieringen har bara arbetskopior, som beskrivs nedan.
+
+## Modulen för tal till text
+
+Modulen ([eneo-mod-speech-to-text](https://github.com/eneo-ai/eneo-mod-speech-to-text)) är en egen webbapp. Man spelar in eller laddar upp ljud, startar ett flöde i Eneo, granskar transkriptet, namnger talarna och får ett dokument, till exempel i Word. Modulen går genom Eneos API med en modulnyckel och personens inloggning. Den levereras som en avbild med `docker-compose.yml`, `env.example` och en Helm-chart i varje utgåva, och en uppgradering är att byta avbildens tagg.
+
+### Utgivet
+
+| Version | Vad den ger | Datum |
+|---|---|---|
+| [0.1.32](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.32) | Sidan visar var ett skickat resultat står: "Skickas", "Nytt försök kl. …", "Resultatet är skickat" eller "Kunde inte skickas", med Eneos text under. Den följer utskicket genom att läsa körningens status, också efter en omladdning och en ny inloggning. Bara ett bekräftat utskick får den gröna bocken. Provad mot Flödes-grenens kärna innan taggen sattes.<br />[PR #100](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/100) | 23 nov |
+| [0.1.31](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.31) | När alla platser för uppladdning är tagna säger modulen "Många skickar just nu. Vi försöker igen." och väntar, i stället för att säga att servern inte kunde nås. Samma formulär skickat två gånger ger två körningar, men ett nytt tryck efter ett svar som kom bort ger samma körning.<br />[PR #99](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/99) | 18 nov |
+| [0.1.30](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.30) | Modulen ber om en ny inloggning när Eneo har avslutat personens inloggning, till exempel efter ett byte av lösenord.<br />[PR #98](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/98) | 15 nov |
+
+[Steg 1.14](/forsta-leveransen/#steg-1-14), modulens utgåva för första leveransen, är klart. Uppspelningen som följer texten och skyddet mot förlorat arbete kom i modulens 0.1.29, och rättningen av ordens tider i talaridentifieringens 0.2.0.
+
+### Nästa före eneo-test
+
+1. **Kärnans besked när innehåll tas bort.** Se [nedan](#kärnans-besked-när-innehåll-tas-bort).
+2. **Modulen glömmer det webbläsaren har sparat om en körning**, som bekräftade ord, utkast och uppspelningens position, när Eneo svarar att körningen eller dess innehåll är borttaget. Delen för filer kan börja nu; resten väntar på kärnans besked. Den generiska delen förs också in i kitet. <Badge text="Inte startad" variant="default" />
+3. **[Provet genom modulen](/forsta-leveransen/#steg-prov).** Ljudet och transkriptet är borta när tiden har gått, dokumentet finns kvar, och en gammal inspelning på enheten återskapar inget.
+4. **[Steg 1.10](/forsta-leveransen/#steg-1-10), avbilden för eneo-test.** Modulen låses vid en utgåva som har beteendet från punkt 2 och är provad i punkt 3.
+
+**Vid sidan av, utan att stoppa eneo-test:** platsen för en uppladdning tas innan filen skickas, så att också små filer väntar på sin tur, och en avbruten uppladdning städas bort.
+
+**Efter eneo-test:** modulen går över till kitet och visar låsta space och ber om inloggning med MFA före inspelningen (se [Modulkitet](#modulkitet)). Därefter kommer lagret på enheten: osända inspelningar tas inte bort automatiskt, organisationen väljer en gräns, och appen visar hur gammal en inspelning är. Båda står under [Modul och transport](/vagen-till-produktion/#modul-och-transport).
+
+### Öppet i modulen
+
+Deltagare från flera formulärfält, så att talaridentifieringen inte kräver ett eget fält "Deltagare", är byggt i kärnan och modulen men inte publicerat som PR.
+
+Tre äldre PR:er står också öppna. Ingen av dem behövs för att använda modulen.
+
+- [#88](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/88): designsystemet Astryx 0.7.13. Den har en konflikt mot `main` och tas upp igen med den senaste versionen av Astryx.
+- [#94](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/94): kortare CI. Utkast.
+- [#89](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/89): ett verktyg för utvecklare. Påverkar inte användare.
+
+## Modulkitet
+
+Kitet ([eneo-module-kit](https://github.com/eneo-ai/eneo-module-kit)) är verktygslådan för att bygga en egen modul till Eneo. Det ska vara generiskt, för alla moduler och inte bara för tal till text, och det som bara vissa moduler behöver ska gå att ta in vid behov. Kitet har tre delar:
+
+- `eneo-module-bff`, modulens backend i Python: inloggningen genom Eneo, sessioner, ett mellanled till Eneo som nekar allt som inte uttryckligen släpps igenom, uppladdning med gränser och servering av gränssnittet.
+- `@eneo-ai/module-kit`, gränssnittet i React: Eneos utseende med designsystemet Astryx, ljust och mörkt läge, sidhuvud, organisationens varumärke, en klient för sessionen och svenska feltexter.
+- En mall: en färdig modul med en låtsad Eneo, prov i webbläsaren och för tillgänglighet, CI och en driftfil.
+
+**Vem använder kitet.** Den som vill prova eller bygga en modul: kitets snabbstart går från ett klonat kit till en inloggad modul på den egna datorn, mot den låtsade Eneo. **Modulen för tal till text använder inte kitet än.** Den byggdes före kitet, kitet bröts sedan ut ur den, och modulen har kvar egna kopior av samma delar. Modulens övergång till kitets paket kommer efter eneo-test. Generiska rättningar i modulen förs under tiden också in i kitet. Talaridentifieringen och transkriberingen är tjänster, inte moduler, och använder inte kitet.
+
+### Utgivet och inte utgivet
+
+Utgivet är bara [0.1.0](https://github.com/eneo-ai/eneo-module-kit/releases/tag/v0.1.0), 8 november. Paketen finns inte på npm eller PyPI; de installeras från filerna i utgåvan på GitHub.
+
+Landat på `main` sedan 0.1.0, men inte utgivet:
+
+| Ändring | Brytande | Datum |
+|---|---|---|
+| Designsystemet Astryx 0.7.12. Gränssnittspaketet kräver den versionen.<br />[PR #11](https://github.com/eneo-ai/eneo-module-kit/pull/11) | Nej | 10 nov |
+| Snabbstart: från en klon till en inloggad modul med ett kommando, på macOS, Linux och Windows.<br />[PR #12](https://github.com/eneo-ai/eneo-module-kit/pull/12) | Nej | 16 nov |
+| Inloggning och sessionsslut som i modulen för tal till text: en inloggning som Eneo har avslutat ger en ny inloggningsruta direkt, flera inloggningar samtidigt stör inte varandra, och tiden för att logga in hos Eneo är en inställning (30 minuter som standard).<br />[PR #13](https://github.com/eneo-ai/eneo-module-kit/pull/13) | Ja | 18 nov |
+| En inloggning som misslyckas i inloggningsfönstret säger det och stannar där. Sidan bakom behåller sitt innehåll.<br />[PR #14](https://github.com/eneo-ai/eneo-module-kit/pull/14) | Ja | 19 nov |
+
+**Uppgraderingsstegen i korthet.** De två brytande ändringarna kräver var sitt steg i en modul som uppgraderar: sidan som visas efter en ny inloggning ska ligga utanför modulens inloggningskontroll (#14), och varje inloggning får en egen kaka, så en inloggning som pågår just under uppgraderingen misslyckas en gång (#13). Stegen med komponenternas namn står i kitets [CHANGELOG](https://github.com/eneo-ai/eneo-module-kit/blob/main/CHANGELOG.md), avsnittet Unreleased.
+
+### Pågår
+
+[PR #15](https://github.com/eneo-ai/eneo-module-kit/pull/15) är öppen. Med den kontrolleras modulens startsökväg (`home_path`) vid start med samma regel som målet för en inloggning, och testet av inloggningsfönstret körs också i Firefox. Ändringen är brytande, och uppgraderingssteget står i PR:en. Ett testjobb i byggflödet (CI) misslyckades: två tester av inloggningsfönstret i WebKit gick inte igenom. Om det räcker att köra om eller om något ska ändras är inte utrett. <Badge text="Öppen PR" variant="caution" />
+
+### Nästa
+
+1. Resten av rättningarna av inloggningen: inloggningsskärmen minns vart man var på väg när en inloggning misslyckas, en sen inloggning får samma tid att återhämta sig som i modulen för tal till text, och modulens logg säger vilket steg i inloggningen som föll.
+2. En ny utgåva av kitet med allt ovan. Numret bestäms när utgåvan görs.
+3. Guiden för att koppla en modul till en riktig Eneo (se nedan).
+4. Bättre utvecklarupplevelse: loggning, en gemensam läsare för Eneos svar, felbesked som säger vad den som bygger modulen ska göra, och tillval som egna importer.
+5. **Kitets kontrakt med Eneo:** Eneos avslag når modulen oförändrade hela vägen, också vid uppladdning, filer och livetext, och filer läses med personens inloggning. Det väntar på MFA för sessionen, som är pausat. Under [Modul och transport](/vagen-till-produktion/#modul-och-transport) heter det "Kitet (#6)".
+6. **Modulens övergång till kitet:** modulen för tal till text går över till kitets paket. Det kommer efter kitets kontrakt med Eneo och efter MFA.
+7. En startmall för nya moduler, efter kontraktet och lagret på enheten.
+
+Inget i kitet är ett villkor för eneo-test. Modulen går dit med sina egna kopior.
+
+### Koppla en modul till en riktig Eneo
+
+Snabbstarten går bara mot den låtsade Eneo. Mot en riktig Eneo krävs i dag tre saker som ingen guide beskriver samlat:
+
+- en tjänstenyckel i Eneo som ägs av en tjänst och har skrivrätt;
+- en registrering av modulen i Eneos administration, med adressen dit inloggningen skickas tillbaka (callback) och nyckelns id;
+- sju miljövariabler i modulen.
+
+Kitet ska få en guide för det. Förslaget, som väntar på ett ja under [Beslut som väntar](/#beslut-som-väntar), är en egen registrering för utveckling, en startrad som gör inställningsfilen bestämmande och körs i CI på tre plattformar, ett prov i webbläsaren, och en tabell från symptom till vad som ska jämföras. Guiden byggs efter rättningarna av inloggningen. Ett kommando som kontrollerar kopplingen kommer först när Eneo kan svara på om en viss nyckel hör till modulen. Eneos egen driftguide för moduler ses över i samma arbete.
+
+## Talaridentifieringen
+
+Talaridentifieringen ([vemsa](https://github.com/eneo-ai/vemsa), "vem sa?") tar emot ljudet och orden och tar reda på vem som sa vad och när varje ord sades. Eneo skickar ett jobb, frågar om det är klart och hämtar resultatet.
+
+| Version | Vad den ger | Datum |
+|---|---|---|
+| [0.2.1](https://github.com/eneo-ai/vemsa/releases/tag/v0.2.1) | Rättar ett fel i hur tjänsten skickar sina webhookar. Eneo berördes inte, eftersom kärnan frågar tjänsten efter resultatet i stället för att vänta på en webhook.<br />[PR #12](https://github.com/eneo-ai/vemsa/pull/12) | 21 nov |
+| [0.2.0](https://github.com/eneo-ai/vemsa/releases/tag/v0.2.0) | Första taggade utgåvan: en avbild för nyare grafikkort, ordens tider hålls inom sina fönster, och tyst ljud ger ett tomt transkript.<br />[PR #8](https://github.com/eneo-ai/vemsa/pull/8) · [#9](https://github.com/eneo-ai/vemsa/pull/9) · [#10](https://github.com/eneo-ai/vemsa/pull/10) | 15 nov |
+
+### Kopian följer kärnans körning
+
+I dag ligger resultatet med talarna kvar i tjänsten i 72 timmar; ljudet tas bort när jobbet är klart. Det är beslutat att allt tjänsten håller om ett jobb ska vara borta när jobbet är överlämnat: Eneo sparar resultatet och kvitterar, och tjänsten tar då bort allt om jobbet. Se också [Gallring](/gallring/#var-innehållet-finns-och-vem-som-tar-bort-det). <Badge text="Påbörjat" variant="caution" />
+
+Ordningen:
+
+1. Tjänsten stänger sin kö rent när den stängs av. Det görs först.
+2. Resultatet läses i ett steg, och loggarna rättas där de skrivs. Påbörjat, ingen PR än.
+3. Tjänsten tar bort jobbet på begäran, med kvittens.
+4. Kärnans del: Eneo kvitterar sparat resultat och driver borttagningen tills den är bekräftad. Den väntar på tjänstens kontrakt.
+5. [Provet genom modulen](/forsta-leveransen/#steg-prov) visar att ljud och transkript är borta också i talaridentifieringens kopia.
+
+## Transkriberingen
+
+Transkriberingen ([vadsa](https://github.com/eneo-ai/vadsa), "vad sa?") är en modellserver för svensk taligenkänning. Den gör tal till text och sparar inga jobb, filer eller databas. Eneo lägger in den som en modell för transkribering, både för flöden och för [livetext](/livetext/). Talaridentifieringen kan använda den som källa för orden.
+
+- Den har ingen utgåva.
+- Vem som äger tjänsten är inte bestämt, och därför finns ingen som granskar och slår in ändringar.
+- Att den inte behåller något efter anropet ska visas i [provet genom modulen](/forsta-leveransen/#steg-prov).
+
+## Kärnans besked när innehåll tas bort
+
+När Eneo tar bort en körning, eller en del av den, måste modulen och talaridentifieringen få ett entydigt besked om vad som är borta. Det beskedet är ett kontrakt mellan kärnan och dem. Transkriberingen sparar inget efter anropet.
+
+Det är beslutat att kontraktet skrivs som en egen, tidig del, före bygget av ljudets och stegets gallring. Det ska täcka
+
+- borttagning av hela körningen och av en del av den, med ett besked som ändras när bara en del är borta;
+- vad som händer när något skickas in eller försöks igen för en körning som är borttagen;
+- en beständig markering för källan att den är gallrad;
+- att borttagningen räknas som bekräftad per kopia.
+
+Modulens kopior, ljudet och lagret på enheten väntar på det. <Badge text="Inte startad" variant="default" />
+
+## Var teamet provar
+
+Eneo-test uppgraderas först när gallringen och de andra stegen före avbilden är klara. Under tiden ska teamet prova Flöden och tal till text i sina standups på en egen server i Dokploy som sätts upp, med Flödes-grenen och modulen. Servern ska köra Eneo som vanligt, utan ändringar i koden eller i compose-filerna, och utan gallring. Det som behövs löses i serverns egen konfiguration.
+
+Det är ännu inte bekräftat att servern är igång.
+
+- **Versioner:** Eneo som en avbild från Flödes-grenen, inte `latest`, som är 2.3.3 utan Flöden. Modulen som `v0.1.32`. Flödes-grenens avbild byggs om när develop har synkats in.
+- **Vid driftsättningen:** låt modulens avbild använda sin egen hälsokontroll (ta bort hälsokontrollen i kärnans exempel för moduler), ge arbetarna `REDIS_PASSWORD` i den gemensamma miljöfilen, och kör kärnans backend på amd64.
+- **Inte provat:** riktiga modeller för transkribering och AI, Dokploys proxy med en riktig domän, och riktiga telefoner. Provet hittills gick genom modulens knappar mot en lokal testmiljö med låtsade modeller.
+
+## Öppna frågor
+
+- **Teamets server för standups:** är den igång, och med vilka versioner?
+- **Talaridentifieringen:** vilka andra system än Eneo skickar ljud till den i drift? Svaret avgör vilka som berörs när tjänsten ändrar hur resultat hämtas och tas bort.
+- **Transkriberingen:** vem äger den?
+- **Kitet på npm och PyPI:** ska paketen publiceras där? Då behöver någon med rätt att göra det skapa organisationen `@eneo-ai` på npm och projektet `eneo-module-bff` på PyPI.
+- **Kitets nästa utgåva:** planen är att ändringarna sedan 0.1.0 ges ut för sig före kitets kontrakt med Eneo, men det är inte bestämt, och inte heller vilket nummer utgåvan med kontraktet då får. Två av ändringarna är brytande.
+- **Modulens övergång till kitet i två steg:** får modulens backend gå över till kitets paket för sig, före gränssnittet och efter avbilden för eneo-test?
+- **Moduler utan Flöden:** i dag tar bara Flödens vägar i Eneo emot en moduls inloggning för användare. En modul utan Flöden kan logga in sina användare men inte läsa något annat i Eneo som användaren. Om kitet ska fungera för sådana moduler är en produktfråga.
+
+## Hör ihop med
+
+- [Livetext](/livetext/): text medan någon spelar in, genom transkriberingen eller en annan server.
+- [Gallring](/gallring/): kärnans motor och var innehållet finns.
+- [Första leveransen till eneo-test](/forsta-leveransen/): stegen före eneo-test, med provet genom modulen.
+- [Vägen till produktion](/vagen-till-produktion/#modul-och-transport): stegen för kitet och modulen efter eneo-test.

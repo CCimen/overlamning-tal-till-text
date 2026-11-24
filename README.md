@@ -13,6 +13,8 @@ En statisk webbplats med läget för arbetet, vägen till produktion, planen fö
 | `src/content/docs/space-och-agande.mdx` | "Space och ägande i Eneo". |
 | `src/content/docs/mfa.mdx` | "MFA i Eneo", och underärendena till #804. |
 | `src/content/docs/onegate.mdx` | "MFA med OneGate: vem gör vad". |
+| `src/content/docs/modulen.mdx` | "Modulen, kitet och taltjänsterna": modulen för tal till text, modulkitet, talaridentifieringen (vemsa), transkriberingen (vadsa), kärnans besked när innehåll tas bort och servern där teamet provar. |
+| `src/content/docs/livetext.mdx` | "Livetext": vad användaren får, hur en administratör slår på det, läget och vad som kommer sedan. |
 | `src/data/lage.json` | Läget: spåren, det som pågår, beslut som väntar och underärendena. Skrivs av exporten; för hand bara när exporten inte går (se nedan). |
 | `src/styles/sajt.css` | Figurernas och rutornas utseende: temats ytor, hörn och accent i båda lägena, och figurernas egna klasser. |
 | `src/components/Underarenden.astro` | Tabellen med underärendena till en epic, ur datafilen. |
@@ -62,6 +64,8 @@ Utöver `lage.json` (som exporten skriver) står läget på några ställen i te
 - [ ] **Vägen till produktion** (`vagen-till-produktion.mdx`): kolumnen Status i tabellerna under "Arbetet, steg för steg", och tabellen över kraven under "De sex kraven" när ett krav ändrar läge.
 - [ ] **Gallring** (`gallring.mdx`): tabellen under "Klart och kvar", och märkena i figuren "En motor för all gallring".
 - [ ] **MFA i Eneo** och **Space och ägande** (`mfa.mdx`, `space-och-agande.mdx`): avsnitten "Läget" och "Var arbetet står".
+- [ ] **Modulen, kitet och taltjänsterna** (`modulen.mdx`): versionerna och datumen i "Kort sagt" och i tabellerna över utgåvor, tabellen över det som har landat i kitet men inte är utgivet, och listorna "Nästa". Gör samma ändring av versionerna på sidan Ta över arbetet, i "Modul och transport" på Vägen till produktion och i steg 1.14 på Första leveransen.
+- [ ] **Livetext** (`livetext.mdx`): tabellen under "Läget", "Kort sagt" och listan "Nästa". När livetext når develop eller en release ändras också "Kort sagt".
 - [ ] **Startsidan** (`index.mdx`): listan "Gör i den här ordningen", och figuren "Så hänger arbetet ihop" om en ruta byter rad.
 - [ ] Bygg (`npm run build`) så att kontrollen och länkkontrollen körs, och läs sidan.
 

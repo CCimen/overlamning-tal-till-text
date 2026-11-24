@@ -23,6 +23,13 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Bredvid eneo-test',
+					items: [
+						{ label: 'Modulen, kitet och taltjänsterna', slug: 'modulen' },
+						{ label: 'Livetext', slug: 'livetext' },
+					],
+				},
+				{
 					label: 'Efter eneo-test (pausat)',
 					items: [
 						{ label: 'Space och ägande', slug: 'space-och-agande' },

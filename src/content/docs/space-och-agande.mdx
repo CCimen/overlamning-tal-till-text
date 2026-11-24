@@ -318,13 +318,11 @@ Modulen har inget eget space. Den loggar in genom Eneo och arbetar i de flöden 
 - Visar låsta space med knappen "Logga in med MFA".
 - Navigerar aldrig till IdP:n under en inspelning.
 - Nekas molnet fortsätter inspelningen lokalt, och personen laddar upp efter stopp.
-- Slås kravet på under en inspelning och sessionen saknar MFA, nekas uppladdningarna och den levande anslutningen stängs inom 35 sekunder, samma gräns som vid utloggning. Ljudet finns kvar lokalt. Har sessionen redan MFA fortsätter inspelningen.
+- Slås kravet på under en inspelning och sessionen saknar MFA, nekas uppladdningarna och anslutningen för livetext stängs inom 35 sekunder. Ljudet finns kvar lokalt. Har sessionen redan MFA fortsätter inspelningen.
 
-### Lucka i dag, oavsett MFA
+### Utloggningen
 
-- Utloggning stänger inte modulens åtkomst.
-- En inspelning fortsätter efter utloggning.
-- Båda rättas i ett eget steg i ordningen nedan.
+- Utloggningens koppling till modulen och livetexten byggs som en egen del, oavsett MFA: steg 6 i ordningen nedan.
 
 ### Att rätta i Flöden
 
@@ -341,7 +339,7 @@ Ordningen för hela arbetet står på [Ta över arbetet](/). Inom space och äga
 3. <small>kärnan · ifyllnad</small><br />**Hemvist på nya och befintliga filer** ([#1424](https://github.com/eneo-ai/eneo/issues/1424))<br />Hemvisten sätts när en fil skapas eller bifogas. Befintliga filer får sin ett space i taget, i omgångar som kan startas om. Alla id:n behålls. Det som inte går att reda ut listas.
 4. <small>kärnan · Svelte · React</small><br />**Filer läses med inloggningen** ([#810](https://github.com/eneo-ai/eneo/issues/810))<br />En ny väg i kärnan, där rätten kommer från det filen sitter på. Klienterna byter till den. En länk till en fil vars space kräver MFA nekas. I dag finns bara länkar. Kan påbörjas samtidigt med steg 1, men blir klar först när steg 1 har landat, eftersom den läser MFA på sessionen och kravet på spacet.
 5. <small>kärnan · Svelte · React</small><br />**Kontrollen vid ingången och reglaget** ([#809](https://github.com/eneo-ai/eneo/issues/809))<br />Ett uppslag för vilket space ett anrop rör, listor med lås, och reglaget med sitt villkor. Väntar på stegen 1–4.
-6. <small>kärnan · Flöden</small><br />**Utloggning stänger modulens åtkomst och den levande transkriberingen** ([#812](https://github.com/eneo-ai/eneo/issues/812))<br />En lucka i dag, oavsett MFA. Kan byggas när som helst, men före steg 7.
+6. <small>kärnan · Flöden</small><br />**Utloggning stänger modulens åtkomst och livetexten** ([#812](https://github.com/eneo-ai/eneo/issues/812))<br />Byggs som en egen del, oavsett MFA. Kan byggas när som helst, men före steg 7.
 7. <small>Flöden</small><br />**Flöden följer spacets MFA** ([#813](https://github.com/eneo-ai/eneo/issues/813))<br />Flödets dörrar prövar kravet, och filer som skapas för ett flöde får hemvist. Väntar på stegen 5 och 6.
 8. <small>kitet · modulen</small><br />**Tal till text hela vägen** ([modulen #6](https://github.com/eneo-ai/eneo-mod-speech-to-text/issues/6))<br />Låsta space, inloggning med MFA före inspelningen och skyddad uppspelning. Sist ett prov mot en riktig IdP.
 
@@ -368,7 +366,7 @@ Ordningen för hela arbetet står på [Ta över arbetet](/). Inom space och äga
 
 En del av steg 1, sessionens MFA, finns: regeln för vad som räknas som MFA och behörigheten att hantera den, på en gren som inte är granskad. Bygget är pausat. Resten av ordningen är inte byggt än.
 
-**Läget:** ombyggnaden på den här sidan (filens hemvist, spacets ägande av filer och MFA per space) är en stor ändring och startas inte nu. Arbetet med tal till text och gallring går före och klarar sig utan den. Det enda som byggs intill är ett litet steg i Flöden: en fil som skapas för ett flöde får veta vilket space och flöde den hör till, och en fil som en körning skapar också vilken körning, så att gallringen hittar rätt filer. Det steget ändrar varken vem som äger en fil eller vem som får läsa den.
+**Läget:** ombyggnaden på den här sidan (filens hemvist, spacets ägande av filer och MFA per space) är en stor ändring och startas inte nu. Arbetet med tal till text och gallring går före och klarar sig utan den. Vid sidan av det har ett litet steg i Flöden landat i Flödes-grenen 23 november: [steg 1.5, filens ursprung](/forsta-leveransen/#steg-1-5) i första leveransen till eneo-test ([#1509](https://github.com/eneo-ai/eneo/pull/1509)). En fil som skapas för ett flöde vet nu vilket space och flöde den hör till, och en fil som en körning skapar också vilken körning, så att gallringen hittar rätt filer. Det steget ändrar varken vem som äger en fil eller vem som får läsa den.
 
 ### Inte verifierat
 
@@ -385,4 +383,4 @@ En del av steg 1, sessionens MFA, finns: regeln för vad som räknas som MFA och
 
 ---
 
-Källor: fem kartläggningar av koden i kärnan och Flöden 12 november, designen för ägande och dess två granskningar och planen för MFA:s första leverans.
+Källor: fem kartläggningar av koden i kärnan och Flöden 12 november, designen för ägande och dess två granskningar, planen för MFA:s första leverans och [#1509](https://github.com/eneo-ai/eneo/pull/1509) i Flöden.

@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-23T12:30+01:00",
-  "github_hamtad": "2026-11-23T12:30+01:00",
+  "hamtad": "2026-11-24T11:54+01:00",
+  "github_hamtad": "2026-11-24T11:54+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -50,18 +50,52 @@
       "totalt": 2,
       "nasta": null,
       "pausad": "väntar på valet mellan låst avbild och release"
+    },
+    {
+      "namn": "Utskick från Flöden",
+      "klara": 1,
+      "totalt": 3,
+      "nasta": null,
+      "pausad": null
+    },
+    {
+      "namn": "Livetext",
+      "klara": 0,
+      "totalt": 1,
+      "nasta": null,
+      "pausad": null
     }
   ],
   "pagar": [
     {
+      "rubrik": "Redigeraren, resten",
+      "lage": "Flödesredigerarens Leverans visar vart körningens resultat skickas och vilka steg som läses. Den sista samlade rättningen är gjord och prövas.",
+      "vantar": "granskningen av den sista rättningen."
+    },
+    {
       "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",
-      "lage": "Talaridentifieringens kopia ska vara borta när Eneo har sparat resultatet. Första delen är byggd och granskad: att resultatet läses i ett steg håller, men loggarna behöver rättas där de skrivs. Arbetet delas därför om: först en rättning av ett befintligt fel i tjänsten, sedan läsningen, sedan loggarna. Borttagningen på begäran byggs efter en ny granskning.",
-      "vantar": "rättningen av det befintliga felet först; sedan byggs läsningen i ett steg och loggarna rättas där de skrivs."
+      "lage": "Talaridentifieringens kopia av ord och resultat ska vara borta när Eneo har sparat resultatet. Ett befintligt fel i tjänsten är rättat i version 0.2.1. Nästa del: tjänsten stänger sin kö rent, sedan läses resultatet i ett steg och loggarna rättas där de skrivs. Borttagningen på begäran byggs efter en ny granskning.",
+      "vantar": "rättningen av köns avstängning, som går först."
     },
     {
       "rubrik": "Reglerna för gallring i Flöden som körbara exempel, kantfallen och mätningen av en riktig körning",
       "lage": "Reglerna för gallring per space, flöde och steg är provade mot kärnans befintliga regel och granskade i tre omgångar som letade kantfall. Ordningen för bygget är bestämd; det som återstår här är att mäta en riktig körning.",
       "vantar": "rättat manus och att provstacken blir ledig."
+    },
+    {
+      "rubrik": "Dagar på organisation, space och flöde med spacet som tak; körningar tas bort när tiden har gått",
+      "lage": "Gallringens första del låter en organisation styra hur länge flödens körhistorik sparas. Den sista samlade rättningen är gjord, och en liten justering av vem som får ändra ett flödes tid i ett personligt utrymme görs nu.",
+      "vantar": "den lilla justeringen och granskningen efter den."
+    },
+    {
+      "rubrik": "Livetext: Eneo kontrollerar servern, inte leverantörstypen, och visar administratören vägen",
+      "lage": "Livetext fungerar också genom en organisations egen gateway som är inlagd som OpenAI-leverantör. Eneo prövar servern i stället för leverantörstypen och visar administratören vad som saknas. Den landar i Flödes-grenen före gallringens del 1.",
+      "vantar": "en sista liten rättning i adminvyn och granskningen efter den."
+    },
+    {
+      "rubrik": "Körningssidan, Skicka igen och utskickets historik",
+      "lage": "Kommande: en knapp för att skicka resultatet igen och en historik över varje utskick.",
+      "vantar": "den stabilare uppföljningen av utskicket."
     }
   ],
   "beslut": [
@@ -83,11 +117,6 @@
     {
       "rubrik": "Hur den som tar över får ärendelistan",
       "text": "I dag finns ärendelistan bara lokalt hos den som leder arbetet. Förslaget är en privat kopia som den som tar över uppdaterar själv.",
-      "prioritet": 1
-    },
-    {
-      "rubrik": "Påslaget av gallring i ett space är en egen handling",
-      "text": "Ska gallringen av flöden slås på uttryckligen per space, eller ska ett space som redan har en tid för samtal börja gallra nya körningar direkt?",
       "prioritet": 1
     },
     {

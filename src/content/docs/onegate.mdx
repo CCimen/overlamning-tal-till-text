@@ -102,7 +102,7 @@ Vad Eneo behöver i inloggningsbiljetten, vad som ställs in i våra två OneGat
 | IdP- och IDM-gruppen | Ställer in OneGate, först i testinstansen och sedan i produktion, och vet hur produktionen är inställd.<br />[Det som ska gälla i OneGate](#det-som-ska-gälla-i-onegate), [frågorna om instansen](#frågor-till-idp--och-idm-gruppen) |
 | MobilityGuard | Företaget bakom OneGate. Svarar på vad OneGate kan, hur det ställs in och vad de rekommenderar.<br />[Frågorna till MobilityGuard](#frågor-till-mobilityguard) |
 
-Varje del går att skicka för sig. Koden i Eneo byggs oberoende av svaren; de avgör bara när MFA kan slås på.
+Varje del går att skicka för sig. Koden i Eneo kan byggas oberoende av svaren; de avgör bara när MFA kan slås på.
 
 ## Det som ska gälla i OneGate
 
@@ -129,7 +129,7 @@ Till IdP- och IDM-gruppen. Det här är vad Eneo behöver av instansen. Hur det 
 
 Värden med fel format räknas som saknade: inloggningen fungerar, men Eneo ser den som utan MFA.
 
-Ett undantag gäller just nu. Utvecklingsversionen av Eneo nekar i dag **varje** inloggning om `amr` är en ensam sträng, om `acr` inte är en sträng eller om `auth_time` är text. Rättningen, där sådana värden räknas som saknade, är inte byggd än. Den släppta versionen 2.3 har inte de kontrollerna. Det är skälet till att värdet ska slås på i test först.
+Ett undantag gäller just nu. Utvecklingsversionen av Eneo nekar i dag **varje** inloggning om `amr` är en ensam sträng, om `acr` inte är en sträng, om `auth_time` är text eller om `auth_time` ligger i framtiden. Rättningen, där sådana värden räknas som saknade, är inte byggd än. De släppta versionerna, till och med 2.3.3, har inte de kontrollerna. Det är skälet till att värdet ska slås på i test först.
 
 Håll biljetten liten. Eneo nekar ett svar från token-adressen som är större än 256 kB (id-token och access-token tillsammans).
 
@@ -138,7 +138,7 @@ Håll biljetten liten. Eneo nekar ett svar från token-adressen som är större 
 Eneo-teamet. Det här behöver ingen svara på; det går att läsa.
 
 - **Vad som skickas i dag.** Vilket `acr`-värde och vilka `amr`-värden biljetten bär vid inloggning med Authenticator respektive SMS läser vi i testinloggningen nedan.
-- **Scope.** Eneo begär `openid email profile`, och discovery-dokumentet annonserar just de tre. De står som en enda sträng, `["openid email profile"]`, i stället för tre.
+- **Scope.** Eneo begär `openid email profile`. Discovery-dokumentet annonserar `openid email roles` som en enda sträng, `["openid email roles"]`, i stället för tre, och nämner inte `profile`.
 - **Värdarna för token och nycklar.** Lästa 13 november i discovery-dokumentet som eneo-test använder: token-adressen och nycklarna ligger på samma värd som utfärdaren, så inga extra värdar behöver läggas in i Eneo. Samma kontroll görs för produktionen.
 - **Inget annonseras om MFA.** Dokumentet saknar `acr_values_supported`, `claims_supported` och `claims_parameter_supported`. Det säger inte att OneGate saknar stödet, bara att det inte går att läsa där.
 - **Redan sett, 9 november.** OneGate återanvände inte en inloggning för Eneos klient i test. En ny begäran några minuter efter en genomförd inloggning med SMS visar valet mellan Authenticator och SMS igen.
@@ -158,7 +158,7 @@ Om vad OneGate kan och vad ni rekommenderar. Bakgrunden: Eneo loggar in personer
 1. Hur sätter man ett `acr`-värde som betyder MFA i id-token för en klient, och vilket värde rekommenderar ni? Om `acr` inte går: kan `amr` bära ett värde som bara finns vid MFA, till exempel `mfa`, som en lista av strängar?
 2. Stöder OneGate att klienten begär MFA, med `acr_values` eller med `claims` och `acr` som "essential"? Vilket rekommenderar ni, eller är det bättre att göra MFA obligatoriskt för klienten?
 3. Om en person redan är inloggad utan MFA och klienten begär MFA: frågar OneGate då bara efter den andra faktorn?
-4. Discovery-dokumentet för vår klient anger `scopes_supported` som en enda sträng med tre namn (`["openid email profile"]`) i stället för tre strängar, och saknar `acr_values_supported` och `claims_parameter_supported`. Är det en inställning i instansen, eller så produkten fungerar? Inget av det hindrar MFA, men en lista och ett publicerat värde gör felsökning enklare.
+4. Discovery-dokumentet för vår klient anger `scopes_supported` som en enda sträng med tre namn (`["openid email roles"]`) i stället för tre strängar, och saknar `acr_values_supported` och `claims_parameter_supported`. Är det en inställning i instansen, eller så produkten fungerar? Inget av det hindrar MFA, men en lista och ett publicerat värde gör felsökning enklare.
 
 ## Så kontrollerar vi att det fungerar
 
@@ -168,7 +168,7 @@ Eneo-teamet gör en testinloggning när värdet är inställt i testinstansen, u
 2. Om det går: samma användare loggar in utan MFA, och vi ser att värdet saknas.
 3. Om OneGate stöder begäran: Eneo begär MFA, OneGate frågar efter den andra faktorn, och värdet finns i den nya biljetten.
 
-Resultatet avgör när MFA kan slås på i Eneo. Bygget i Eneo väntar inte på det.
+Resultatet avgör när MFA kan slås på i Eneo. Bygget i Eneo behöver inte vänta på det.
 
 ## Hör ihop med
 

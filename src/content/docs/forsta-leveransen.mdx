@@ -9,17 +9,21 @@ import { Badge } from '@astrojs/starlight/components';
 
 <p><small>Tal till text och Flöden</small></p>
 
-Vad som byggs om i Flöden medan ingen databas ännu binder oss, vad som ska vara klart innan eneo-test uppgraderas och innan verksamheterna bjuds in, och vägen därefter till produktion.
+Vad som byggs om i Flöden före eneo-test, vad som ska vara klart innan eneo-test uppgraderas och innan verksamheterna bjuds in, och vägen därefter till produktion.
 
-<Badge text="Pågår" variant="caution" /> Eneo-test uppgraderas med en låst avbild från Flödes-grenen, utan MFA och utan release. 1.1, 1.2, 1.2b, 1.5 och 1.14 har landat, liksom gallringens delade värden och synken av develop in i Flödes-grenen: filerna i Flöden visar nu var de kom ifrån. Modulen finns i version 0.1.32, som visar var körningens resultat står när det skickas till en mottagare, och avbilden från Flödes-grenen är ombyggd med synken. Redigerarens andra del får en sista rättning. Gallringens första del är byggd och granskad och får en sista rättning: spacets tid blir tak för flödena, ett flöde kan välja en kortare tid, och tiden ändras av den som är admin i spacet och har gallringsbehörigheten på sin roll. Teamets standups körs under tiden som ett internt prov på en egen server utan gallring. Produktionen kommer efter space, ägande och MFA; låst avbild eller release är inte bestämt, och tidpunkt 3 gäller bara vid en release.
+<Badge text="Pågår" variant="caution" /> Eneo-test uppgraderas med en låst avbild från Flödes-grenen, utan MFA och utan release. 1.1, 1.2, 1.2b, 1.5 och 1.14 (stegen i stegkartan nedan) har landat, liksom gallringens delade värden och synken av develop in i Flödes-grenen: filerna i Flöden bär sedan 23 november uppgift om var de kom ifrån ([#1509](https://github.com/eneo-ai/eneo/pull/1509)). Modulen finns i version 0.1.32, som visar var körningens resultat står när det skickas till en mottagare, och avbilden från Flödes-grenen är ombyggd med synken.
+
+Tre ändringar ska landa härnäst i Flödes-grenen, i den här ordningen: livetext genom en organisations egen gateway ([#1514](https://github.com/eneo-ai/eneo/pull/1514)), gallringens första del ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och redigerarens andra del, avsnittet Leverans ([#1508](https://github.com/eneo-ai/eneo/pull/1508)). De två senare får en sista rättning, och en slutgranskning följer. Gallringens första del gör spacets tid till tak för flödena, ett flöde kan välja en kortare tid, och tiden ändras av den som är administratör i spacet och har gallringsbehörigheten på sin roll.
+
+Sex ändringar har landat i develop sedan den senaste synken och kommer till Flödes-grenen med nästa. Version 2.3.3 kom ut 23 november, utan Flöden. Under tiden ska teamet prova Flöden och tal till text i sina standups på en egen server som sätts upp, utan gallring. Produktionen kommer efter space, ägande och MFA; låst avbild eller release är inte bestämt, och tidpunkt 3 gäller bara vid en release.
 
 ## Kort sagt
 
 1. **Körningarnas kärna i Flöden är väl byggd och står kvar.** Delningen mellan utkast, fryst version och körning, nycklarna som håller organisationen rätt, och utlådorna som inte tappar något.
 2. **Skulden ligger i sömmarna mot kärnan.** Flöden har på minst sju ställen en egen variant av en regel som kärnan äger, och bär stegens och byggchattens inställningar på dolda assistentrader.
 3. **Flöden gallras av kärnans gallringsmotor, inte av en egen.** Körningarnas tid väljs för spacet och flödet, med spacet som tak. En administratör i spacet slår på gallringen, och bara körningar som startar därefter tas bort. Ljudet kan få en kortare tid; egna tider per steg kommer efter piloten. Inget innehåll gallras förrän någon har valt en tid. Rester som aldrig blev en körning städas efter 24 timmar som standard, en tid som organisationen kan ändra eller stänga av, och ett borttaget flöde slutstädas. Flöden får ingen egen schemaläggare.
-4. **Spacets roll avgör vad man får göra med ett flöde,** ovanpå kontots behörighet för Flöden. Den personliga ägaren försvinner.
-5. **Migrationskedjan behålls.** Teamets server kör Flödes-grenen på en databas som ska behållas, så schemat ändras med revisioner framåt, och [steg 1.9](#steg-1-9) görs inte före piloten.
+4. **Spacets roll avgör vad man får göra med ett flöde,** ovanpå kontots behörighet för Flöden. Flödets personliga ägare försvinner.
+5. **Migrationskedjan behålls.** Teamets egen server, som sätts upp, ska köra Flödes-grenen på en databas som ska behållas, så schemat ändras med revisioner framåt, och [steg 1.9](#steg-1-9) görs inte före piloten.
 6. **Fyra tidpunkter styr ordningen:** före den första databasen, före de första användarna, före develop (bara om produktionen blir en release) och före känsligt material. Stegen före eneo-test står under [Tidpunkt 1](#tidpunkt-1-före-den-första-databasen).
 7. **Space, ägande och MFA ingår inte, och båda är pausade.** Planen ser till att Flöden inte gör dem svårare när de startas.
 
@@ -56,31 +60,35 @@ Ja, i sin kärna. Det som bör byggas om ligger nästan helt där Flöden lutar 
 | Filens ägare som andra åtkomstregel | Bygg om | Samma fil nås på två sätt med olika regler. |
 | Slutet på livscykeln | Bygg | Ett borttaget flöde städas aldrig. |
 | Samma text på många ställen per körning | Mät först | Räknat 16 till 19 kopior av transkriptet. Inget är mätt. |
-| Migrationshistoriken | Ren grund, en gång | 75 filer, varav 19 sammanfogningar och 13 som tar ut varandra. |
+| Migrationshistoriken | Ren grund, en gång, efter piloten | 75 filer, varav 19 sammanfogningar och 13 som tar ut varandra. Kedjan behålls fram till dess. |
 
 </details>
 
 ## Tidpunkt 1: före den första databasen
 
-Femton ändringar i kod landar en i taget, i den här ordningen, innan eneo-test uppgraderas. Gallringen går först. Sedan provas uppgraderingen och driften (1.10 till 1.15). Efter varje steg körs hela testsviten och samma prov i en egen stack; slutar något fungera som fungerade förut stannar arbetet där. Öppna ett steg för detaljerna.
+Ändringarna i kod landar en i taget, i den här ordningen, innan eneo-test uppgraderas. Två av dem, egna tider per steg (G3) och en ren migrationsgrund (1.9), väntar till efter piloten. Gallringen går först. Sedan provas uppgraderingen och driften (1.10 till 1.15). Efter varje steg körs hela testsviten och samma prov i en egen stack; slutar något fungera som fungerade förut stannar arbetet där. Öppna ett steg för detaljerna.
 
 <figure class="sparbild stegkarta not-content" aria-labelledby="stegkarta">
-	<figcaption id="stegkarta">Stegen före eneo-test, i landningsordning</figcaption>
+	<figcaption id="stegkarta">Stegen före eneo-test, i landningsordning, och de två som väntar till efter piloten</figcaption>
 	<div class="spar klar">
 		<p class="spar-namn">Landat</p>
-		<ul class="spar-steg fria"><li><a href="#steg-1-1"><b>1.1</b> Synken blir grön och mergas</a></li><li><a href="#steg-1-2"><b>1.2</b> De fyra migrationerna och rollmallarna rättas</a></li><li><a href="#steg-1-2b"><b>1.2b</b> Flöden slås på i administrationen</a></li><li><a href="#steg-1-14"><b>1.14</b> En ny utgåva av modulen, och rättningen av ordens tider</a></li></ul>
+		<ul class="spar-steg fria"><li><a href="#steg-1-1"><b>1.1</b> Synken blir grön och mergas</a></li><li><a href="#steg-1-2"><b>1.2</b> De fyra migrationerna och rollmallarna rättas</a></li><li><a href="#steg-1-2b"><b>1.2b</b> Flöden slås på i administrationen</a></li><li><a href="#steg-1-5"><b>1.5</b> Filens ägare och ursprung</a></li><li><a href="#steg-1-14"><b>1.14</b> En ny utgåva av modulen, och rättningen av ordens tider</a></li></ul>
 	</div>
 	<div class="spar nu">
-		<p class="spar-namn">Nu: ursprung och gallring</p>
-		<ol class="spar-steg"><li><a href="#steg-1-5"><b>1.5</b> Filens ägare och ursprung</a> (byggt)</li><li><a href="#steg-1-3"><b>1.3</b> Gallringens form i schemat och regeln</a></li><li><a href="#steg-2-3"><b>2.3</b> Rester städas</a></li><li><a href="#steg-2-4"><b>2.4</b> Ljudet släpps, körningen står kvar</a></li><li><a href="#steg-g3"><b>G3</b> Ett steg får en egen tid</a></li><li><a href="#steg-prov"><b>Prov</b> Provet genom modulen</a></li></ol>
+		<p class="spar-namn">Nu: gallring</p>
+		<ol class="spar-steg"><li><a href="#steg-1-3"><b>1.3</b> Gallringens form i schemat och regeln</a></li><li><a href="#steg-2-3"><b>2.3</b> Rester städas</a></li><li><a href="#steg-2-4"><b>2.4</b> Ljudet släpps, körningen står kvar</a></li><li><a href="#steg-prov"><b>Prov</b> Provet genom modulen</a></li></ol>
 	</div>
 	<div class="spar">
 		<p class="spar-namn">Städning i Flöden</p>
-		<ol class="spar-steg"><li><a href="#steg-1-8"><b>1.8</b> API-nycklarnas dagliga underhåll kör igen</a></li><li><a href="#steg-1-6"><b>1.6</b> Spacets roller styr flödet</a></li><li><a href="#steg-1-4"><b>1.4</b> Versioner på de frysta formaten</a></li><li><a href="#steg-1-7"><b>1.7</b> Chattens modellkapacitet</a></li><li><a href="#steg-1-8b"><b>1.8b</b> Byggchattens bindning överlever samtalet</a></li><li><a href="#steg-1-9"><b>1.9</b> En ren migrationsgrund, skuren sist</a></li></ol>
+		<ol class="spar-steg"><li><a href="#steg-1-8"><b>1.8</b> API-nycklarnas dagliga underhåll kör igen</a></li><li><a href="#steg-1-6"><b>1.6</b> Spacets roller styr flödet</a></li><li><a href="#steg-1-4"><b>1.4</b> Versioner på de frysta formaten</a></li><li><a href="#steg-1-7"><b>1.7</b> Chattens modellkapacitet</a></li><li><a href="#steg-1-8b"><b>1.8b</b> Byggchattens bindning överlever samtalet</a></li></ol>
 	</div>
 	<div class="spar">
 		<p class="spar-namn">Uppgradering av eneo-test</p>
 		<ol class="spar-steg"><li><a href="#steg-1-10"><b>1.10</b> En avbild att lita på</a></li><li><a href="#steg-1-11"><b>1.11</b> Uppgraderingen provas på en kopia av databasen</a></li><li><a href="#steg-1-12"><b>1.12</b> Stacken och proxyn</a></li><li><a href="#steg-1-13"><b>1.13</b> Inställningar och inloggning</a></li><li><a href="#steg-1-15"><b>1.15</b> Prov efter driftsättningen</a></li></ol>
+	</div>
+	<div class="spar">
+		<p class="spar-namn">Efter piloten</p>
+		<ol class="spar-steg"><li><a href="#steg-g3"><b>G3</b> Ett steg får en egen tid</a></li><li><a href="#steg-1-9"><b>1.9</b> En ren migrationsgrund</a></li></ol>
 	</div>
 </figure>
 
@@ -112,20 +120,18 @@ _Ingen ska behöva skriva SQL för att börja använda Flöden._
 </details>
 
 <details id="steg-1-5">
-<summary><strong>1.5</strong> Filens ägare och ursprung <Badge text="Byggt" variant="note" /><br /><small>Flödes-grenen, kärnans filtabell</small></summary>
+<summary><strong>1.5</strong> Filens ägare och ursprung <Badge text="Landat" variant="success" /><br /><small>Flödes-grenen, kärnans filtabell</small></summary>
 
-Byggt i två delar. Migrationen döper om ägarkolumnen i stället för att skriva om varje rad. Ursprunget skrivs på filraden när filen skapas. Varje väg som skapar en fil för ett flöde listas först; en bilaga som laddas upp genom den vanliga filvägen och fästs på ett steg är en vanlig fil som flödet använder.
+Landat 23 november i två delar ([#1509](https://github.com/eneo-ai/eneo/pull/1509)). Migrationen döper om ägarkolumnen i stället för att skriva om varje rad. Ursprunget skrivs på filraden när filen skapas. Varje väg som skapar en fil för ett flöde skriver ursprunget: uppladdning till ett publicerat steg, en Word-mall och varje fil som en körning skapar. En bilaga som laddas upp genom den vanliga filvägen och fästs på ett steg är en vanlig fil utan ursprung.
 
 _Se delen [Filerna](#filerna)._
-
-Var granskningen står just nu syns under [Pågår](/#pågår) på startsidan.
 
 </details>
 
 <details id="steg-1-3">
 <summary><strong>1.3</strong> Gallringens form i schemat och regeln<br /><small>Flödes-grenen</small></summary>
 
-Flödets körningar anmäls som en regel i kärnans gallringsmotor, med nivåerna organisation, space och flöde och med spacets vanliga tid som tak. Den schemalagda borttagningen av hela körningar kommer med. Lägena försvinner. Den manuella rensningen står kvar. Efter uppgraderingen tas inget bort förrän en administratör har sett hur många körningar som berörs och slagit på det.
+Flödets körningar anmäls som en regel i kärnans gallringsmotor, med nivåerna organisation, space och flöde och med spacets vanliga tid som tak. Lägena försvinner. Den manuella rensningen står kvar. Beslutat 2026-11-23: en administratör i spacet slår på gallringen, och bara körningar som startar därefter tas bort. Körningar som fanns innan rörs inte, så påslaget behöver ingen förhandsräkning och ingen bekräftelse. Steget byggs i två delar: den första ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) byter regeln och väntar på sin slutgranskning, och den andra för in den schemalagda borttagningen av hela körningar.
 
 _Se delen [Gallringen](#gallringen)._
 
@@ -208,20 +214,20 @@ _Annars får eneo-test avhuggna svar eller fel i vanlig chatt efter uppgradering
 <details id="steg-1-8b">
 <summary><strong>1.8b</strong> Byggchattens bindning överlever samtalet<br /><small>Flödes-grenen</small></summary>
 
-Raden som binder person, flöde och assistent nycklas inte längre på det aktuella samtalet. Tas samtalet bort står bindningen, modellvalet och de äldre samtalen kvar, och flödets borttagning hittar alltid assistenten. Får ett eget planpass.
+Raden som binder person, flöde och assistent nycklas inte längre på det aktuella samtalet. Tas samtalet bort står bindningen, modellvalet och de äldre samtalen kvar, och flödets borttagning hittar alltid assistenten. Får en egen designgenomgång.
 
 _Annars uppstår dolda assistenter som ingen längre kan koppla till ett flöde, redan vid första användningen._
 
 </details>
 
 <details id="steg-1-9">
-<summary><strong>1.9</strong> En ren migrationsgrund, skuren sist<br /><small>Flödes-grenen</small></summary>
+<summary><strong>1.9</strong> En ren migrationsgrund<br /><small>Flödes-grenen, efter piloten</small></summary>
 
-**Beslutat 2026-11-23:** teamets server kör Flödes-grenen på en databas som ska behållas. Steget görs därför inte före piloten, och schemat ändras med revisioner framåt.
+**Beslutat 2026-11-23:** teamets egen server, som sätts upp, ska köra Flödes-grenen på en databas som ska behållas. Steget görs därför inte före piloten, och schemat ändras med revisioner framåt.
 
-Två eller tre revisioner ovanpå develops huvud ersätter de 75, när formändringarna ovan har landat och ingen annan lägger till migrationer.
+Efter piloten ersätter två eller tre revisioner ovanpå develops huvud de 75, när ingen annan lägger till migrationer.
 
-_Visar likhetsbeviset en skillnad som inte går att förklara eller rätta levereras allt annat genom den rättade kedjan, och bara grunden väntar till develop._
+_Fram till dess levereras allt genom den rättade kedjan. Visar likhetsbeviset en skillnad som inte går att förklara eller rätta väntar grunden till develop._
 
 </details>
 
@@ -232,7 +238,7 @@ Grenen byggs för hand, och stacken låses vid den commitens tagg efter en helt 
 
 **Före låsningen**
 
-- loggrättningarna ([#1449](https://github.com/eneo-ai/eneo/pull/1449))
+- loggrättningarna ([#1449](https://github.com/eneo-ai/eneo/pull/1449)), landade 20 november
 - loggrättningen i talaridentifieringen
 - två rotationer av modulens nyckel i följd
 - modulens besked vid nekad nyckel
@@ -272,7 +278,7 @@ Spärren på fyra samtidiga körningar står kvar: den femte får ett svar att v
 <details id="steg-1-14">
 <summary><strong>1.14</strong> En ny utgåva av modulen, och rättningen av ordens tider <Badge text="Landat" variant="success" /><br /><small>Modulen och talaridentifieringen</small></summary>
 
-Landat. Modulen är släppt med rättningen av uppspelningen och skyddet mot förlorat arbete, och ber om ny inloggning efter ett lösenordsbyte. Den senaste utgåvan, v0.1.31, säger när modulen är upptagen och försöker igen i stället för att ge ett fel. Ett formulär som skickas på nytt ger en ny körning, medan ett nytt tryck efter ett svar som kom bort får samma körning. Den provades före utgivningen mot en kärna från tom databas, med förbehåll: kärnan var byggd lokalt, utan HTTPS, med låtsad transkribering och bara i Chromium. Rättningen av ordens tider är släppt i talaridentifieringens version 0.2.0, provad på processorn med den riktiga modellen men inte på ett grafikkort.
+Landat. Modulen är släppt med rättningen av uppspelningen och skyddet mot förlorat arbete, och ber om ny inloggning efter ett lösenordsbyte. Version 0.1.31 säger när modulen är upptagen och försöker igen i stället för att ge ett fel. Ett formulär som skickas på nytt ger en ny körning, medan ett nytt tryck efter ett svar som kom bort får samma körning. Den provades före utgivningen mot en kärna från tom databas, med förbehåll: kärnan var byggd lokalt, utan HTTPS, med låtsad transkribering och bara i Chromium. Den senaste utgåvan, v0.1.32 (23 november), visar dessutom var körningens resultat står när det skickas till en mottagare. Rättningen av ordens tider är släppt i talaridentifieringens version 0.2.0, provad på processorn med den riktiga modellen men inte på ett grafikkort. Talaridentifieringens senaste version, 0.2.1, rättar ett fel i hur tjänsten skickar sina webhookar. Eneo berördes inte, eftersom kärnan frågar tjänsten efter resultatet.
 
 _Ordens tider lagras och räknas aldrig om. Utan rättningen sparas ord som är upp till 30 sekunder för långa._
 
@@ -294,7 +300,7 @@ Det här fryser när folk börjar använda Flöden: beteende de lär sig, och re
 
 Den vanliga filvägen listar dem inte och tar inte emot dem. Före en körning gäller uppladdningens bindning till flödet, steget och personen; i en körning körningens regel; för mallar och byggfiler rätten till flödet. Klart när en sökning efter flödesfiler som används utanför Flöden är tom eller varje träff är hanterad, och kedjan uppladdning, kontroll före start, körning och gallring är provad.
 
-_Före de första användarna är kopplingarna utanför Flöden få och kända: bara teamets eget prov kan ha skapat några. Beslutet att stänga vägen gäller, och steget samordnas med den öppna ändringen av filrättigheter (#1410)._
+_Före de första användarna är kopplingarna utanför Flöden få och kända: bara teamets eget prov kan ha skapat några. Beslutet att stänga vägen gäller, och steget samordnas med ändringen av filrättigheter ([#1410](https://github.com/eneo-ai/eneo/pull/1410)), som landade i develop 23 november och kommer till Flödes-grenen med nästa synk._
 
 </details>
 
@@ -348,7 +354,7 @@ Den som uppgraderar och inte använder Flöden ska inte märka något. API-forme
 <details id="steg-3-1">
 <summary><strong>3.1</strong> Steget äger sina inställningar<br /><small>Flödes-grenen</small></summary>
 
-Instruktion, modell, modellinställningar, kunskap och bilagor ligger på steget. Får ett eget planpass innan något lovas.
+Instruktion, modell, modellinställningar, kunskap och bilagor ligger på steget. Får en egen designgenomgång innan något lovas.
 
 _Se delen [Stegen och de dolda assistenterna](#stegen-och-de-dolda-assistenterna)._
 
@@ -433,7 +439,7 @@ För varje del: vilka problemen är, vad den rena lösningen är, varför den ä
 
 _Tidpunkt 1_
 
-De fyra migrationer som gör fel rättas innan någon databas kör dem, och historiken får en ren grund en enda gång.
+De fyra migrationer som gör fel rättas innan någon databas kör dem, och historiken får en ren grund en enda gång, efter piloten.
 
 <details>
 <summary>Problemen, lösningen och hur vi vet</summary>
@@ -447,12 +453,12 @@ De fyra migrationer som gör fel rättas innan någon databas kör dem, och hist
 #### Lösningen
 
 - De fyra och rollmallarna rättas på plats. Klart när en uppgraderad databas från version 2.3 har Flöden av, oförändrade roller, oförändrade gränser och tomma gallringsfält för körningar.
-- Två eller tre revisioner ovanpå develops huvud ersätter de 75, skurna sist och en gång, efter att formändringarna i den här planen har landat. Datamigrationerna mot kärnans befintliga data står kvar.
+- Två eller tre revisioner ovanpå develops huvud ersätter de 75, skurna en gång, efter piloten, när ingen annan lägger till migrationer. Datamigrationerna mot kärnans befintliga data står kvar.
 - Därefter gäller två regler: databasens migrations-id antecknas efter varje driftsättning, och en körd migration ändras aldrig.
 
 #### Varför den är bättre
 
-- Bortvalt: att behålla kedjan. Skälet för det var att kedjan då hade körts mot en riktig databas, men enligt vad vi vet har ingen databas som ska bevaras kört den; driften bekräftar det före [steg 1.9](#steg-1-9).
+- Beslutat 2026-11-23: kedjan behålls fram till piloten. Teamets egen server, som sätts upp, ska köra Flödes-grenen på en databas som ska behållas, så schemat ändras med revisioner framåt, och grunden skärs först efter piloten ([steg 1.9](#steg-1-9)).
 - Bortvalt: att rätta med nya migrationer i slutet. De kan inte ångra en höjd gräns eller en utdelad behörighet utan att också ta bort det någon har valt själv.
 - Kostnaden: grunden måste bevisas lik kedjan, och sammanfogningarna kommer tillbaka vid varje synk av develop tills Flöden är i develop.
 
@@ -461,7 +467,7 @@ De fyra migrationer som gör fel rättas innan någon databas kör dem, och hist
 - Samma schema och samma data från fyra håll: tom databas och develop med data, genom kedjan och genom grunden. Dessutom en kopia av en riktig databas från version 2.3.
 - Grunden skrivs för hand ur kedjans slutresultat, inte genererad ur modellen, eftersom modellen inte uttrycker allt (ett standardvärde på en kolumn finns till exempel bara i migrationen).
 - Jämförelsen görs mot en fryst referens: kedjan med de beslutade ändringarna införda. Den täcker mer än modellen: standardvärden, villkor och om de är validerade, nycklarnas borttagsregler, index, utlösare och lagringsinställningar.
-- Reserv om beviset visar en skillnad som inte går att förklara eller rätta: allt annat vid tidpunkt 1 levereras genom den befintliga kedjan, och bara grunden väntar till develop, med en omstämpling av eneo-test.
+- Visar beviset en skillnad som inte går att förklara eller rätta står kedjan kvar, och grunden väntar till develop, med en omstämpling av eneo-test.
 
 _Prövat i källan: sant._
 
@@ -490,19 +496,19 @@ Flödet blir en nivå i kärnans gemensamma regel från början, så att inga v�
 - Hela körningar: valda per organisation, space och flöde, i dagar, med spacet som tak.
 - Rester: efter 24 timmar som standard; organisationen kan ändra tiden eller stänga av städningen.
 - Ljudets släpp: valt på flödet, direkt, i timmar efter körningens slut, eller när det sista steget som behöver ljudet är klart.
-- Steget: en tid per steg i timmar, under flödets och spacets tak.
-- Utan ett val gallras inget, och efter uppgraderingen tas inget bort förrän en administratör har sett hur mycket som berörs och slagit på det.
+- Steget: en tid per steg i timmar, under flödets och spacets tak. Kommer efter piloten.
+- Utan ett val gallras inget. En administratör i spacet slår på gallringen, och bara körningar som startar därefter tas bort. Körningar som fanns innan rörs inte, så påslaget behöver ingen förhandsräkning och ingen bekräftelse.
 - Slutstädningen av ett borttaget flöde: följer borttagningen, utan tidsval.
 - Flödens egen kod för att ta bort en körning med allt dess innehåll står kvar som det motorns uppgift anropar. Den manuella rensningen använder samma kod och står kvar utan läge, så att en körning alltid går att ta bort.
-- Att ändra en tid kräver gallringsbehörigheten oavsett väg, som redan är beslutat. I dag räcker rätten att redigera spacet för spacets vanliga tid, och den tiden börjar nu styra körningar.
-- Före eneo-tests uppgradering: hela körningar med förhandsräkningen och bekräftelsen, städningen av rester, ljudets släpp och stegets tid. Slutstädningen av borttagna flöden kommer före de första användarna.
+- Att ändra en tid kräver gallringsbehörigheten oavsett väg, som redan är beslutat. Spacets tid ändras av den som är administratör i spacet och har gallringsbehörigheten på sin roll. En tid som spacet redan har för samtal startar ingenting i Flöden förrän gallringen slås på.
+- Före eneo-tests uppgradering: hela körningar med påslaget och den schemalagda borttagningen, städningen av rester och ljudets släpp. Stegets tid kommer efter piloten. Slutstädningen av borttagna flöden kommer före de första användarna.
 
 #### Varför den är bättre
 
 - Bortvalt: att driftsätta den gamla modellen och omvandla senare. Ärendet för den nya modellen har en hel uppgraderingstabell som bara finns för att gamla värden kan finnas.
 - En regel i stället för två: Python och SQL för körningar försvinner, och kärnans paritetstest mellan de två gäller också Flöden.
 - En motor i stället för två: synken av develop (#1420) för in kärnans gallringsmotor i Flödes-grenen, men ansluter inte Flöden till den. Motorns regler på grenen är i dag samtalshistorik och widgetar.
-- Kostnaden: texterna måste bytas redan nu. En ny eller kortad tid tar också bort äldre körningar.
+- Kostnaden: texterna måste bytas redan nu. En kortad tid kan ta bort körningar som startade efter påslaget, och det får en enkel varning. Körningar från före påslaget rörs aldrig.
 
 #### Så vet vi det
 
@@ -526,10 +532,10 @@ Var en flödesfil kom till skrivs på filen när den skapas, och filen nås bara
 
 #### Problemen
 
-- En flödesfil är en vanlig rad i den delade filtabellen, ägd av uppladdaren. Samma fil nås på två sätt med olika regler: genom körningen, och genom den vanliga filvägen som bara frågar efter ägaren.
+- En flödesfil är en vanlig rad i den delade filtabellen, ägd av uppladdaren. Samma fil nås på två sätt med olika regler: genom körningen, och genom den vanliga filvägen som bara frågar vem som äger filen.
 - Uppladdaren kan bifoga filen i en chatt eller en app. När gallringen sedan tar bort kopplingen till flödet lever filen vidare utan något som säger var den kom ifrån.
-- Migrationen som byter filens ägare skriver om varje rad i filtabellen hos varje kommun, fast värdet inte ändras.
-- En fil som en körning skapar får sin filrad innan kopplingen till körningen skrivs.
+- Migrationen som byter filens ägare skrev om varje rad i filtabellen hos varje kommun, fast värdet inte ändrades. Den döper nu om kolumnen i stället ([#1509](https://github.com/eneo-ai/eneo/pull/1509)).
+- En fil som en körning skapar och kopplingen till körningen skrivs i två steg.
 - Innan en körning finns kontrollerar uppladdaren sin fil genom den vanliga fillänken. Flödens egen filväg kräver en körning.
 
 #### Lösningen
@@ -537,7 +543,7 @@ Var en flödesfil kom till skrivs på filen när den skapas, och filen nås bara
 - Ursprunget skrivs på filraden när filen skapas, i två fall: uppladdad till Flöden (space och flöde; hit hör också mallar och andra byggfiler) och skapad av en körning (space, flöde och körning). Det är fakta som inte ger åtkomst.
 - Migrationen döper om ägarkolumnen i stället för att kopiera den.
 - Före de första användarna: flödesfiler listas och tas inte emot av den vanliga filvägen. Åtkomsten går genom Flöden på tre namngivna sätt, alla med regler som redan finns: före en körning genom uppladdningens bindning till flödet, steget och personen; i en körning genom körningens regel; för mallar och andra byggfiler genom rätten till flödet. Ingen ny behörighetsmodell för filer.
-- Luckan för filer som en körning skapar täpps till, med ett avbrottsprov.
+- Filen och kopplingen till körningen skrivs så att ett avbrott inte lämnar en fil utan koppling, med ett avbrottsprov.
 
 #### Varför den är bättre
 
@@ -561,7 +567,7 @@ _Prövat i källan: delvis. Uppladdningen har ingen lucka; fallet med filer som 
 
 _Tidpunkt 1_
 
-Kontots behörighet för Flöden avgör om personen når Flöden alls, och rollen i spacet avgör vad personen får göra med flödena där, som för assistenter och appar. Den personliga ägaren blir historik. Beslutat.
+Kontots behörighet för Flöden avgör om personen når Flöden alls, och rollen i spacet avgör vad personen får göra med flödena där, som för assistenter och appar. Flödets personliga ägare blir historik. Beslutat.
 
 <details>
 <summary>Problemen, lösningen och hur vi vet</summary>
@@ -569,19 +575,19 @@ Kontots behörighet för Flöden avgör om personen når Flöden alls, och rolle
 #### Problemen
 
 - Ett flöde har tre lager: organisationens rättighet, rollen i spacet och en personlig ägare. Assistenter, appar och samlingar har bara de två första.
-- Ägaren sätts när flödet skapas och ändras aldrig. Slutar personen kan bara en organisationsadministratör som också är medlem i spacet ändra, avpublicera eller ta bort flödet.
+- Flödets ägare sätts när flödet skapas och ändras aldrig. Slutar personen kan bara en organisationsadministratör som också är medlem i spacet ändra, avpublicera eller ta bort flödet.
 - Dokumentationen och felmeddelandet lovar att spacets ägare kan gå förbi, men den rollen finns bara i personliga space.
 
 #### Lösningen
 
 - Två lager står kvar. Kontots behörighet för Flöden (se, köra, hantera) avgör om personen når Flöden och dess resurser. Rollen i spacet avgör vad personen får göra med flödena där.
 - Ägarledet tas bort ur behörighetskontrollen. Redaktör och administratör i spacet får ändra, publicera och ta bort, som de får med assistenter.
-- Kolumnen för ägaren tas bort i samma leverans. Vem som skapade flödet står kvar som historik.
+- Kolumnen för flödets ägare tas bort i samma leverans. Vem som skapade flödet står kvar som historik.
 
 #### Varför den är bättre
 
 - Bortvalt: ägarbyte. Det lägger till en mekanism där en befintlig regel räcker.
-- Minsta alternativet: spacets administratör får gå förbi ägaren. Det lagar frånvarofallet men behåller två regler.
+- Minsta alternativet: spacets administratör får gå förbi flödets ägare. Det lagar frånvarofallet men behåller två regler.
 - Kostnaden: redaktörer kan ändra varandras flöden. Appen skickar alltid den revision redaktören läste, och en inaktuell skrivning nekas, så i appen skriver ingen över någon annan tyst.
 - API:t tillåter att revisionen utelämnas vid uppdatering, publicering och avpublicering; då gäller den senaste skrivningen. Det behålls som ett uttalat val för API-konsumenter och skrivs i API-beskrivningen. Bortvalt: att kräva revisionen av alla, eftersom varje API-konsument då måste läsa flödet före varje skrivning.
 
@@ -615,7 +621,7 @@ Steget äger sina inställningar, och byggchatten slutar skapa en dold assistent
 
 #### Lösningen
 
-- Redan före den första databasen: bindningen mellan person, flöde och assistent överlever samtalet. Det aktuella samtalet blir en pekare som får vara tom, och nästa gång personen öppnar byggchatten startar ett nytt samtal på samma assistent.
+- Före eneo-test: bindningen mellan person, flöde och assistent överlever samtalet. Det aktuella samtalet blir en pekare som får vara tom, och nästa gång personen öppnar byggchatten startar ett nytt samtal på samma assistent.
 - Instruktion, modell, modellinställningar, kunskap och bilagor ligger på steget. Flödets redigering äger ändringen. Kontrollerna för modeller och kunskap i ett space delas med assistenten.
 - Körningen läser redan bara den frysta kopian och bygger sitt assistentobjekt i minnet. Det ändras inte.
 - Byggchatten får en assistent per flöde, som flödet pekar ut, i stället för en per person och flöde. Personens modellval står kvar på chattens egen rad och skickas med anropet.
@@ -627,14 +633,14 @@ Steget äger sina inställningar, och byggchatten slutar skapa en dold assistent
 - Raderna är en per steg, inte en per körning. Görs bytet efter att flöden har byggts krävs en avgränsad flytt av utkastens inställningar, inte av körningarna.
 - Bortvalt för byggchatten: ingen assistentrad alls. Gallringen hittar ett samtal genom assistenten, så utan rad skulle byggchattens frågor aldrig gallras. Det kräver en ny ägarregel i gallringsmotorn och är inget för nu.
 - Bortvalt för byggchatten: en delad assistent som varje person skriver sina val på. Nästa persons modellval skulle skriva över den föregåendes.
-- För bindningen: ändringen stannar i Flödens egen tabell, och raden bär redan flöde, person, assistent och inställningar. Bortvalt: att skriva flödets id på assistentraden, som ändrar kärnans assistenttabell. Bortvalt: att ta bort assistenten med sitt samtal; den har flera samtal, så de äldre skulle raderas med. Bortvalt: hela bytet till en assistent per flöde redan nu, eftersom det inte har något planpass.
+- För bindningen: ändringen stannar i Flödens egen tabell, och raden bär redan flöde, person, assistent och inställningar. Bortvalt: att skriva flödets id på assistentraden, som ändrar kärnans assistenttabell. Bortvalt: att ta bort assistenten med sitt samtal; den har flera samtal, så de äldre skulle raderas med. Bortvalt: hela bytet till en assistent per flöde redan nu, eftersom det inte har haft någon designgenomgång.
 - Kostnaden: störst i planen. Redigerarens API, paketformatet, byggchattens verktyg och kopiering av steg följer med.
 
 #### Så vet vi det
 
 - Ett samtal A med innehåll, sedan ett nytt samtal B, sedan tas B bort: A finns kvar, bindningen finns kvar, och assistenten går fortfarande att koppla till flödet. Samma sak när gallringen tar samtalet.
 - Efter varje väg som tar bort något (samtal, flöde, person, space) finns ingen dold byggchattsassistent utan bindning.
-- Ett eget planpass avgör fyra saker innan något lovas: stegets fält och kopplingar, vad kopiering av ett steg betyder, en gemensam ägare för kontrollerna, och övergången för API, paket och befintliga utkast.
+- En egen designgenomgång avgör fyra saker innan något lovas: stegets fält och kopplingar, vad kopiering av ett steg betyder, en gemensam ägare för kontrollerna, och övergången för API, paket och befintliga utkast.
 - Två personer använder olika modeller i byggchatten samtidigt utan att påverka varandra, och äldre konversationer går fortfarande att hitta och gallra.
 - En redaktör med flödesrätt men utan assistenträtt kan skapa och ändra steg. Paket, byggchatt, kopiering och publicering går genom samma ägare.
 - Antalet filer i kärnan som nämner dolda assistenter räknas före och efter.
@@ -654,7 +660,7 @@ Där Flöden har en egen variant av en regel som kärnan äger får regeln en ä
 
 #### Problemen
 
-- Körningen kontrollerar inte att modellen fortfarande är tilldelad spacet, och kunskapskällor laddas per organisation. En administratör som tar bort en modell kan inte lita på att flödena slutar använda den.
+- Kontrollen av modell och kunskap när en körning startar ska följa samma regel som ett assistentanrop. Det görs i [steg 2.2](#steg-2-2), före de första användarna.
 - Flödens kapacitetsregel gäller varje chattanrop och räknar svarsutrymmet annorlunda än develop, så långa samtal får avhuggna svar eller fel.
 - Vanlig transkribering får en gräns som bär Flödens namn: fem timmar och 2 GiB avkodat ljud som standard, där develop inte har någon gräns. Grenen gör om typade fel till allmänna.
 
@@ -798,11 +804,11 @@ De sex första gäller ombyggnaden. "Gäller" betyder att rekommendationen följ
 
 | Läge | Fråga | Rekommendation |
 |---|---|---|
-| Gäller | Ska allt vid tidpunkt 1 landa före eneo-tests första uppgradering, fast det försenar den? | Ja. Det är ingen brådska med eneo-test, och arbetet görs i rätt ordning, steg för steg. En dump av eneo-test får användas för att simulera uppgraderingen, och teamets prov kan vänta tills tidpunkt 1 har landat. |
+| Gäller | Ska allt vid tidpunkt 1 landa före eneo-tests första uppgradering, fast det försenar den? | Ja. Det är ingen brådska med eneo-test, och arbetet görs i rätt ordning, steg för steg. En dump av eneo-test får användas för att simulera uppgraderingen. Under tiden ska teamet prova Flöden och tal till text i sina standups på en egen server som sätts upp, med Flödes-grenen och utan gallring. |
 | Gäller | Hur sparas var en flödesfil kom till? | Ursprunget skrivs på filraden nu. Hemvistens betydelse lämnas till teamets arbete med space och ägande. |
 | Gäller | Vem får ändra ett flöde? | **Beslutat:** spacets roller, som för assistenter och appar, ovanpå kontots behörighet för Flöden. Skyddet mot att skriva över varandra gäller i appen; en API-konsument som utelämnar revisionen skriver över med avsikt. |
-| Gäller | Ren migrationsgrund nu eller när Flöden går in i develop? | Sist vid tidpunkt 1, när inget annat lägger till migrationer. Bara om likhetsbeviset visar en skillnad som inte går att förklara eller rätta levereras den rättade kedjan, och grunden skärs då när Flöden går in i develop, med en omstämpling av eneo-test. När dumpen av eneo-test finns gör den beviset mot en riktig databas från version 2.3 möjligt; till dess används en påhittad databas med samma slags historik. |
-| Gäller | Ska stegen lämna assistenttabellen före develop? | Ja, efter ett planpass. Alternativet är att märket alfa också gäller Flödens API; då följer de dolda raderna med in i develop. |
+| Gäller | Ren migrationsgrund nu eller när Flöden går in i develop? | **Beslutat 2026-11-23:** kedjan behålls fram till piloten, eftersom teamets egen server, som sätts upp, ska köra Flödes-grenen på en databas som ska behållas. Schemat ändras med revisioner framåt, och grunden skärs efter piloten. Visar likhetsbeviset en skillnad som inte går att förklara eller rätta skärs grunden först när Flöden går in i develop, med en omstämpling av eneo-test. När dumpen av eneo-test finns gör den beviset mot en riktig databas från version 2.3 möjligt; till dess används en påhittad databas med samma slags historik. |
+| Gäller | Ska stegen lämna assistenttabellen före develop? | Ja, efter en designgenomgång. Alternativet är att märket alfa också gäller Flödens API; då följer de dolda raderna med in i develop. |
 | Gäller | Ska flödesfiler stängas för den vanliga filvägen före de första användarna, fast den som lämnat spacet då förlorar sin väg till filen? | Ja. Före de första användarna berörs bara teamets eget prov, och de kopplingar det kan ha skapat söks upp innan vägen stängs. Efteråt blir det en brytande ändring. Vad som ska gälla på sikt avgör teamet. |
 | Gäller | Vilket material får verksamheterna lägga in innan MFA och hela gallringen finns? | Bara material som inte är sekretess eller känsliga personuppgifter enligt er egen klassning. Det sägs i inbjudan. |
 | Gäller | Bjuds verksamheterna in först när ljudet kan tas bort automatiskt efter en vald tid? | Ja. |
@@ -814,7 +820,7 @@ De sex första gäller ombyggnaden. "Gäller" betyder att rekommendationen följ
 | Öppen | Var ska ljudet bo på eneo-test? | I objektlagring om driften har en. Annars i PostgreSQL efter två mätningar. |
 | Gäller | Uppdateringen av designsystemet före eller efter modulens nästa utgåva? | **Beslutat:** efter, och modulens utgåva är släppt. Uppdateringen får göra flödessidan tyngre. |
 | Öppen | Spacets administratörer kan lyssna på allas inspelningar. Godtas det under provet? | Ja, men det står i inbjudan. |
-| Öppen | Flöden in i develop före eller efter kollegans två stora ändringar i assistenterna? | Avgörs när tidpunkt 3 närmar sig. De rör 28 av samma backendfiler. |
+| Gäller | Ska Flöden in i develop före eller efter de två stora ändringarna i assistenterna? | Avgjort: de två ändringarna ([#1163](https://github.com/eneo-ai/eneo/pull/1163), [#1212](https://github.com/eneo-ai/eneo/pull/1212)) landade i develop 23 november, så Flöden går in efter dem. De kommer till Flödes-grenen med nästa synk. |
 | Öppen | Ska React-appen ta över eneo-tests huvudvärd? Flödenas sidor finns bara där. | Ja, som uppgraderingssidan beskriver: alla loggar in igen, och Svelte-appen går att få tillbaka med en inställning. |
 | Öppen | Går alla modellanrop i provet till godkända lokala tjänster? | Med steg 2.2 före de första användarna spelar svaret mindre roll. Utan det avgör svaret när steget behövs. |
 | Öppen | Gamla miljövärden stoppar starten på grenen. Stopp eller varning i develop? | Varning, med en rad på uppgraderingssidan. |
@@ -826,14 +832,13 @@ De sex första gäller ombyggnaden. "Gäller" betyder att rekommendationen följ
 ## Det vi inte vet
 
 <details>
-<summary>Visa de sju okända</summary>
+<summary>Visa de sex okända</summary>
 
 - Hur mycket en körning lagrar. Det är inte mätt än.
 - Om den rena migrationsgrunden blir lik kedjan. Det går bara att visa genom körning.
-- Om någon annan databas som ska bevaras har kört grenen. En utvecklingsmiljö som ska tas bort kör den. Svaret behövs före [steg 1.9](#steg-1-9).
 - Hur lång tid uppgraderingen tar med filernas innehåll. En dump utan innehållet provar inte de migrationer som läser eller flyttar det.
 - Vilka som använder eneo-test i dag. Uppgraderingen ändrar chatten, inloggningen och uppladdningen för dem också.
-- När nästa release skärs från develop.
+- När nästa release skärs från develop. Den senaste, 2.3.3 (23 november), kom från 2.3-grenen och har inte Flöden.
 - Hur många samtidiga jobb GPU-tjänsterna klarar.
 
 </details>

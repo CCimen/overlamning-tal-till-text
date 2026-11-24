@@ -118,7 +118,7 @@ Helheten först: vägen för ett möte, varför det byggs i kärnan och hur det 
    - **I dag:** inloggningen läser MFA-uppgifterna men sparar dem inte.
    - **Efter:** sessionen får ett ja eller nej när den skapas. Varje anrop som rör ett space som kräver MFA prövas vid ingången till kärnan, och den som saknar MFA loggar in igen med MFA. Före produktion visar en riktig inloggning att IdP:n skickar värdet.
 2. **Modulen och Eneo**
-   - **I dag:** modulen har egna kopior av kitet. Ett nej från Eneo blir "servern kunde inte nås", uppladdningsdelar prövas inte, och förbindelsen får vara okrypterad.
+   - **I dag:** modulen har egna kopior av kitet. Modulen säger när Eneo nekar modulens nyckel och när Eneo har avslutat inloggningen, men inte alla nej från Eneo släpps fram som de är, och förbindelsen får vara okrypterad.
    - **Efter:** allt går genom kitet. Nejet visas som det är, varje del prövas, och okrypterat kräver driftens uttryckliga val.
 3. **Flödets två dörrar**
    - **I dag:** ingen kontroll av MFA. En öppen live-anslutning fortsätter efter utloggning.
@@ -234,6 +234,7 @@ Målet är tal till text i produktion utan omvägar, med lösningar som håller.
 ### Går bredvid
 
 - Tak för samtal och organisationens sida<br />ändrar befintligt beteende vid uppgradering och ska inte skyndas
+- Livetext<br />visar text på skärmen medan någon spelar in i ett flöde. Funktionen finns bara på Flödes-grenen; den sparade livetexten hör till gallringen och städningen under Ingår. Läget står på sidan [Livetext](/livetext/)
 
 ### Väntar
 
@@ -275,7 +276,7 @@ Varje rad är ett spår. Inom ett spår landar en PR i taget, i pilarnas ordning
     </ol>
   </div>
   <div class="lane">
-    <div class="lane-name">Gallring<small>krav D och E, först i Flöden</small></div>
+    <div class="lane-name">Gallring<small>krav D och E, först i Flöden; G1, G0 och 1.5 klara</small></div>
     <ol>
       <li><span class="box"><span class="id">G1</span>Täta körningar i kärnan</span></li>
       <li><span class="box"><span class="id">G0</span>Stegnivåns namn och felet över taket</span></li>
@@ -331,12 +332,12 @@ Varje rad är ett spår. Inom ett spår landar en PR i taget, i pilarnas ordning
   </div>
 </div>
 
-- **Gallringen i Flöden går först i den första leveransen.** Filens ursprung (1.5) kommer före ljudet, så att ljudet kan tas bort för sig. Inget innehåll gallras förrän någon har valt en tid.
+- **Gallringen i Flöden går först i den första leveransen.** G1, G0 och filens ursprung (1.5, landat 23 november) är klara. Ursprunget kom före ljudet, så att ljudet kan tas bort för sig. Nästa är att flödets tid gäller (1.3): dess första del ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) är öppen och landar efter livetexten ([#1514](https://github.com/eneo-ai/eneo/pull/1514)). Inget innehåll gallras förrän någon har valt en tid.
 - **Eneo tål biljetten (L0.6) kommer före sessionens MFA (M1).** M1 sätter sitt ja eller nej ur biljettens värden, och ett värde med fel form ska då räknas som saknat i stället för att stoppa inloggningen.
 - **Space, ägande och MFA kommer efter eneo-test.** Ordningen för space och ägande och MFA står på ett ställe, under [Ordningen](/space-och-agande/#ordningen) på sidan Space och ägande i Eneo. M1 och H1 har var sin databasändring, och de landar en i taget.
 - **Synken har öppnat Flöden.** Taket för samtal (G5) går bredvid och återanvänder delarna från Flöden när det byggs. Taket för samtal och bilagenamnen i appars granskningsrader försenar inget bygge och inte sammanslagningen, men den version som provas för produktion ska innehålla båda.
-- **Kitet (#6) väntar på M1.** Modulen (#6) väntar på kitet, på M7 och på utloggningen (L1). L1 hänger inte på något annat och ska vara klar före M7, som återanvänder prövningen av en pågående inspelning.
-- **Lagren på enheten väntar på källjudet,** eftersom Eneo först då kan svara "borttaget".
+- **Kitet (#6) väntar på M1.** Modulen (#6) väntar på kitet, på M7, på utloggningen (L1) och på att kitet godtar en sen inloggning (vilket modulen redan gör). L1 hänger inte på något annat och ska vara klar före M7, som återanvänder prövningen av en pågående inspelning.
+- **Lagren på enheten väntar på modulen (#6),** och på källjudet och kärnans besked när en körning eller en del av den är borttagen, eftersom Eneo först då kan svara "borttaget".
 - **Vägen till produktion är inte vald.** Kör produktionen en release slås Flöden in i develop (F1) när M6, M7 och gallringen är inne på Flödes-grenen, och slutprovet körs på develop. Kör den en låst avbild från Flödes-grenen behövs inte det. Valet behövs inte före eneo-test.
 
 ## Arbetet, steg för steg
@@ -383,7 +384,7 @@ Gallringens steg, det som är klart och det som är kvar, står under [Klart och
 
 ### Modul och transport
 
-Stegen nedan är inte startade. Vid sidan av dem är modulen ute i version 0.1.31 och talaridentifieringen (vemsa) i 0.2.0. Kitet har fått modulens regler för sessionsslut och inloggning, och ett inloggningsfönster som säger när inloggningen misslyckas, provat i Chromium och WebKit men inte i Firefox. Vad som står näst på tur står på [Ta över arbetet](/#modulen-kitet-och-talaridentifieringen).
+Stegen nedan är inte startade. Vid sidan av dem är modulen ute i version 0.1.32 (23 november), talaridentifieringen (vemsa) i 0.2.1 (med rättade webhookar; Eneo berördes inte eftersom kärnan hämtar resultatet) och modulkitet i 0.1.0, med fyra landade ändringar som ännu inte är utgivna. Hela läget och vad som står näst på tur finns på [Modulen, kitet och taltjänsterna](/modulen/).
 
 | Steg | Vad och varför | Krav | Status |
 |---|---|---|---|

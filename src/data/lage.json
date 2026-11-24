@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-24T12:18+01:00",
-  "github_hamtad": "2026-11-24T12:18+01:00",
+  "hamtad": "2026-11-24T13:30+01:00",
+  "github_hamtad": "2026-11-24T13:30+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -69,8 +69,8 @@
   "pagar": [
     {
       "rubrik": "Redigeraren, resten",
-      "lage": "Flödesredigerarens Leverans visar vart körningens resultat skickas och vilka steg som läses. Granskningen är klar, och den landar när de automatiska kontrollerna är klara.",
-      "vantar": "de automatiska kontrollerna och granskningsboten."
+      "lage": "Flödesredigeraren får en egen del för leveransen av körningens resultat. Den är granskad och väntar på ett sista beslut.",
+      "vantar": "ett beslut om en känd begränsning."
     },
     {
       "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",
@@ -84,13 +84,13 @@
     },
     {
       "rubrik": "Dagar på organisation, space och flöde med spacet som tak; körningar tas bort när tiden har gått",
-      "lage": "Gallringens första del låter en organisation styra hur länge flödens körhistorik sparas. Den sista samlade rättningen är gjord, och en liten justering av vem som får ändra ett flödes tid i ett personligt utrymme görs nu.",
-      "vantar": "den lilla justeringen och granskningen efter den."
+      "lage": "Gallring del 1 för Flöden: varje flöde kan få en egen tid för hur länge körningarnas historik sparas, med spacets tid som tak. Den granskas nu en sista gång.",
+      "vantar": "den sista granskningen och de automatiska kontrollerna."
     },
     {
       "rubrik": "Livetext: Eneo kontrollerar servern, inte leverantörstypen, och visar administratören vägen",
-      "lage": "Livetext fungerar också genom en organisations egen gateway som är inlagd som OpenAI-leverantör. Eneo prövar servern i stället för leverantörstypen och visar administratören vad som saknas. Den landar i Flödes-grenen före gallringens del 1.",
-      "vantar": "en sista liten rättning i adminvyn och granskningen efter den."
+      "lage": "Livetext går att använda via en egen gateway för OpenAI, och administratören ser varför en modell inte kan användas och vad som behöver ändras. Den granskas en sista gång.",
+      "vantar": "den sista granskningen och de automatiska kontrollerna."
     },
     {
       "rubrik": "Körningssidan, Skicka igen och utskickets historik",
@@ -117,6 +117,11 @@
     {
       "rubrik": "Hur den som tar över får ärendelistan",
       "text": "I dag finns ärendelistan bara lokalt hos den som leder arbetet. Förslaget är en privat kopia som den som tar över uppdaterar själv.",
+      "prioritet": 1
+    },
+    {
+      "rubrik": "fyra val för första versionen",
+      "text": "En första version av gallringen i Flöden är planerad och granskad. Fyra val om vad den ska omfatta väntar på beslut.",
       "prioritet": 1
     },
     {

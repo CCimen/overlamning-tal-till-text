@@ -332,7 +332,7 @@ Varje rad är ett spår. Inom ett spår landar en PR i taget, i pilarnas ordning
   </div>
 </div>
 
-- **Gallringen i Flöden går först i den första leveransen.** G1, G0 och filens ursprung (1.5, landat 23 november) är klara. Ursprunget kom före ljudet, så att ljudet kan tas bort för sig. Nästa är att flödets tid gäller (1.3): dess första del ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) är öppen och landar efter livetexten ([#1514](https://github.com/eneo-ai/eneo/pull/1514)). Inget innehåll gallras förrän någon har valt en tid.
+- **Gallringen i Flöden går först i den första leveransen.** G1, G0 och filens ursprung (1.5, landat 23 november) är klara. Ursprunget kom före ljudet, så att ljudet kan tas bort för sig. Nästa är att flödets tid gäller (1.3): dess första del ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) är öppen och i sin sista granskning. Inget innehåll gallras förrän någon har valt en tid.
 - **Eneo tål biljetten (L0.6) kommer före sessionens MFA (M1).** M1 sätter sitt ja eller nej ur biljettens värden, och ett värde med fel form ska då räknas som saknat i stället för att stoppa inloggningen.
 - **Space, ägande och MFA kommer efter eneo-test.** Ordningen för space och ägande och MFA står på ett ställe, under [Ordningen](/space-och-agande/#ordningen) på sidan Space och ägande i Eneo. M1 och H1 har var sin databasändring, och de landar en i taget.
 - **Synken har öppnat Flöden.** Taket för samtal (G5) går bredvid och återanvänder delarna från Flöden när det byggs. Taket för samtal och bilagenamnen i appars granskningsrader försenar inget bygge och inte sammanslagningen, men den version som provas för produktion ska innehålla båda.

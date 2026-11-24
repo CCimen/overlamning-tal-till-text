@@ -14,7 +14,7 @@ import { Badge } from '@astrojs/starlight/components';
 - **Livetext** betyder att talet blir text på skärmen medan någon spelar in i ett flöde.
 - Livetext finns bara på Flödes-grenen. Den finns inte i develop och inte i någon utgåva; den senaste utgåvan är 2.3.3 från 23 november.
 - Den öppna ändringen [#1514](https://github.com/eneo-ai/eneo/pull/1514) gör att livetext fungerar genom en organisations egen gateway som är inlagd som en leverantör av typen OpenAI. En regel i Eneo avgör var livetext kan köras och säger varför när svaret är nej.
-- #1514 landar först av de tre öppna ändringarna mot Flödes-grenen. Sedan kommer del 1 av gallringen i Flöden ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och redigerarens avsnitt Leverans ([#1508](https://github.com/eneo-ai/eneo/pull/1508)).
+- #1514 är en av tre öppna ändringar mot Flödes-grenen, tillsammans med del 1 av gallringen i Flöden ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och redigerarens avsnitt Leverans ([#1508](https://github.com/eneo-ai/eneo/pull/1508)). De landar var för sig när de är klara.
 - Med #1514 heter det bara **Livetext** (på engelska Live text) i React-appen (web-next).
 
 ## Vad användaren får
@@ -68,7 +68,7 @@ Den äldre administrationen i Svelte-appen behåller sin ruta "Livetranskriberin
 | Livetext i flödets inspelning, i startdialogen i React-appen | Flödes-grenen | <Badge text="Klart" variant="success" /> |
 | En administratör slår på livetext för en modell hos en vLLM-leverantör | Flödes-grenen | <Badge text="Klart" variant="success" /> |
 | Ett flöde kan ha en egen modell för livetext | Flödes-grenen | <Badge text="Klart" variant="success" /> |
-| En gateway som är inlagd som OpenAI kan bära livetext, en regel avgör var, och namnet blir Livetext<br />[PR #1514](https://github.com/eneo-ai/eneo/pull/1514) | Mot Flödes-grenen | <Badge text="Landar först" variant="caution" /> |
+| En gateway som är inlagd som OpenAI kan bära livetext, en regel avgör var, och namnet blir Livetext<br />[PR #1514](https://github.com/eneo-ai/eneo/pull/1514) | Mot Flödes-grenen | <Badge text="Öppen PR" variant="caution" /> |
 | Livetext i develop eller i en utgåva | Inte påbörjat | <Badge text="Inte startad" variant="default" /> |
 
 #1514 är granskad och provad i webbläsaren. Kvar är en liten rättning i administrationen av modeller och granskningen efter den. Ändringen lägger till fält i API:t och bryter ingen utgåva, eftersom livetext inte finns i någon utgåva. På en server som redan kör Flödes-grenen kan en vLLM-leverantör med utgående headers inte längre bära livetext. Dess markerade modeller visas som **Livetext används inte** tills headers tas bort.

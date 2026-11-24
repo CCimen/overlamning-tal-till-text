@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-24T11:54+01:00",
-  "github_hamtad": "2026-11-24T11:54+01:00",
+  "hamtad": "2026-11-24T12:18+01:00",
+  "github_hamtad": "2026-11-24T12:18+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -69,8 +69,8 @@
   "pagar": [
     {
       "rubrik": "Redigeraren, resten",
-      "lage": "Flödesredigerarens Leverans visar vart körningens resultat skickas och vilka steg som läses. Den sista samlade rättningen är gjord och prövas.",
-      "vantar": "granskningen av den sista rättningen."
+      "lage": "Flödesredigerarens Leverans visar vart körningens resultat skickas och vilka steg som läses. Granskningen är klar, och den landar när de automatiska kontrollerna är klara.",
+      "vantar": "de automatiska kontrollerna och granskningsboten."
     },
     {
       "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",

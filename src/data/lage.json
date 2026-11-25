@@ -1,10 +1,10 @@
 {
-  "hamtad": "2026-11-25T16:25+01:00",
-  "github_hamtad": "2026-11-25T16:25+01:00",
+  "hamtad": "2026-11-25T17:23+01:00",
+  "github_hamtad": "2026-11-25T17:23+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
-      "klara": 9,
+      "klara": 10,
       "totalt": 31,
       "nasta": "Kärnans besked när en körning eller en del av den är borttagen",
       "pausad": null
@@ -67,11 +67,6 @@
     }
   ],
   "pagar": [
-    {
-      "rubrik": "Inspelningen i React: tåligare vid nätavbrott under långa möten",
-      "lage": "Inspelningen i Flöden tål nu nätavbrott: delarna sparas på enheten och skickas av sig själva när nätet är tillbaka. Ändringen är granskad och provad och väntar på de sista automatiska kontrollerna.",
-      "vantar": "de automatiska kontrollerna."
-    },
     {
       "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",
       "lage": "Talaridentifieringens kopia av ord och resultat ska vara borta när Eneo har sparat resultatet. Ett befintligt fel i tjänsten är rättat i version 0.2.1. Nästa del: tjänsten stänger sin kö rent, sedan läses resultatet i ett steg och loggarna rättas där de skrivs. Borttagningen på begäran byggs efter en ny granskning.",

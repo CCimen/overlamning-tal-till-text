@@ -63,7 +63,7 @@ Det här ingår inte än: uppladdningar som aldrig blev en körning, en egen kor
 
 ### Kvar före eneo-test
 
-1. **Bygga avbilden och prova den.** En avbild byggs ur Flödes-grenen med gallringen, och den första versionen provas på en separat testserver, inte på eneo-test. Det första bygget efter landningen stannade på ett test i frontendens kontroller. Felet utreds, och bygget körs om när det är rättat.
+1. **Bygga avbilden och prova den.** En avbild byggs ur Flödes-grenen med gallringen, och den första versionen provas på en separat testserver, inte på eneo-test. Det första bygget efter landningen stannade på en kontroll i den äldre webbappen: gallringens nya felkod saknade en rad där. Det rättas nu, och sedan körs bygget om.
 2. **Landa det som är byggt och granskas nu.** Inspelningen som klarar nätavbrott, en sessionskontroll som inte kan bli hängande, tydligare adminsidor för att koppla en modell som en annan aktör kör, och ett större fält för långa värden i ett flödes steg.
 3. **Gallringens rester och senare delar.** Först uppladdningar som aldrig blev en körning. Efter testet: ljudets egen tid och personliga space.
 4. **Hämta in develop i Flödes-grenen.** Det är en större sammanslagning: nio ändringar i develop ska in, och tolv filer kräver bedömning.

@@ -1,6 +1,6 @@
 {
-  "hamtad": "2026-11-25T14:34+01:00",
-  "github_hamtad": "2026-11-25T14:34+01:00",
+  "hamtad": "2026-11-25T16:25+01:00",
+  "github_hamtad": "2026-11-25T16:25+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
@@ -69,8 +69,8 @@
   "pagar": [
     {
       "rubrik": "Inspelningen i React: tåligare vid nätavbrott under långa möten",
-      "lage": "Inspelningen i nya webbappen klarar nätavbrott; de två sista gränserna rättas i sessionskontrollen innan den landar.",
-      "vantar": "rättningen av sessionskontrollen."
+      "lage": "Inspelningen i Flöden tål nu nätavbrott: delarna sparas på enheten och skickas av sig själva när nätet är tillbaka. Ändringen är granskad och provad och väntar på de sista automatiska kontrollerna.",
+      "vantar": "de automatiska kontrollerna."
     },
     {
       "rubrik": "Talaridentifieringens kopia av ord och resultat följer kärnans körning",

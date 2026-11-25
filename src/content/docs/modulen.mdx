@@ -11,7 +11,7 @@ import { Badge } from '@astrojs/starlight/components';
 
 ## Kort sagt
 
-- **Modulen för tal till text** är ute i version [0.1.32](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.32) sedan 23 november. Den visar om ett flödes resultat skickas, är skickat eller inte kunde skickas. Inga landade ändringar väntar på en ny utgåva.
+- **Modulen för tal till text** är ute i version [0.1.33](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.33) sedan 25 november. Den gör uppladdningen tålig på en svag uppkoppling: en uppladdning som står still väntar och försöker själv igen, släpper sin plats åt andra efter en stund och börjar om av sig själv. Inga landade ändringar väntar på en ny utgåva.
 - **Modulkitet** är ute i version [0.1.0](https://github.com/eneo-ai/eneo-module-kit/releases/tag/v0.1.0) sedan 8 november. Fyra ändringar har landat sedan dess men är inte utgivna, och två av dem är brytande. Modulen för tal till text använder ännu inte kitet.
 - **Talaridentifieringen (vemsa)** är ute i version [0.2.1](https://github.com/eneo-ai/vemsa/releases/tag/v0.2.1) sedan 21 november. Nästa stora del är att tjänstens kopia av ord och resultat tas bort när Eneo har sparat resultatet.
 - **Transkriberingen (vadsa)** gör tal till text. Den har ingen utgåva, och vem som äger den är inte bestämt.
@@ -28,6 +28,7 @@ Modulen ([eneo-mod-speech-to-text](https://github.com/eneo-ai/eneo-mod-speech-to
 
 | Version | Vad den ger | Datum |
 |---|---|---|
+| [0.1.33](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.33) | En uppladdning i delar på en svag uppkoppling ger inte upp. När inga byte kommer fram svarar modulen med en egen kod, och sidan väntar och försöker själv igen som vid ett nätavbrott. En uppladdning som står still släpper sin plats efter en stund, så att andra kommer fram, och börjar om av sig själv när den kommer tillbaka. Avbilden provades mot en riktig kärna före utgåvan. Den som har ändrat tidsinställningarna för uppladdning bör läsa utgåvans anteckningar. | 25 november |
 | [0.1.32](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.32) | Sidan visar var ett skickat resultat står: "Skickas", "Nytt försök kl. …", "Resultatet är skickat" eller "Kunde inte skickas", med Eneos text under. Den följer utskicket genom att läsa körningens status, också efter en omladdning och en ny inloggning. Bara ett bekräftat utskick får den gröna bocken. Provad mot Flödes-grenens kärna innan taggen sattes.<br />[PR #100](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/100) | 23 nov |
 | [0.1.31](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.31) | När alla platser för uppladdning är tagna säger modulen "Många skickar just nu. Vi försöker igen." och väntar, i stället för att säga att servern inte kunde nås. Samma formulär skickat två gånger ger två körningar, men ett nytt tryck efter ett svar som kom bort ger samma körning.<br />[PR #99](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/99) | 18 nov |
 | [0.1.30](https://github.com/eneo-ai/eneo-mod-speech-to-text/releases/tag/v0.1.30) | Modulen ber om en ny inloggning när Eneo har avslutat personens inloggning, till exempel efter ett byte av lösenord.<br />[PR #98](https://github.com/eneo-ai/eneo-mod-speech-to-text/pull/98) | 15 nov |
@@ -154,7 +155,7 @@ Eneo-test uppgraderas först när gallringen och de andra stegen före avbilden 
 
 Det är ännu inte bekräftat att servern är igång.
 
-- **Versioner:** Eneo som en avbild från Flödes-grenen, inte `latest`, som är 2.3.3 utan Flöden. Modulen som `v0.1.32`. Flödes-grenens avbild byggs om när develop har synkats in.
+- **Versioner:** Eneo som en avbild från Flödes-grenen, inte `latest`, som är 2.3.3 utan Flöden. Modulen som `v0.1.33`. Flödes-grenens avbild byggs om när develop har synkats in.
 - **Vid driftsättningen:** låt modulens avbild använda sin egen hälsokontroll (ta bort hälsokontrollen i kärnans exempel för moduler), ge arbetarna `REDIS_PASSWORD` i den gemensamma miljöfilen, och kör kärnans backend på amd64.
 - **Inte provat:** riktiga modeller för transkribering och AI, Dokploys proxy med en riktig domän, och riktiga telefoner. Provet hittills gick genom modulens knappar mot en lokal testmiljö med låtsade modeller.
 

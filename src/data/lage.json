@@ -1,10 +1,10 @@
 {
-  "hamtad": "2026-11-25T11:07+01:00",
-  "github_hamtad": "2026-11-25T11:07+01:00",
+  "hamtad": "2026-11-25T12:38+01:00",
+  "github_hamtad": "2026-11-25T12:38+01:00",
   "kedjor": [
     {
       "namn": "Första leveransen till eneo-test",
-      "klara": 8,
+      "klara": 9,
       "totalt": 31,
       "nasta": "Kärnans besked när en körning eller en del av den är borttagen",
       "pausad": null
@@ -67,11 +67,6 @@
     }
   ],
   "pagar": [
-    {
-      "rubrik": "GALLR-3 del 2: körningar och deras filer gallras automatiskt efter spacets och flödets tid",
-      "lage": "Körningar i Flöden och deras filer tas bort automatiskt när ytans gallringstid har gått; gränssnittet är genomgånget i en webbläsare på svenska och engelska.",
-      "vantar": "den automatiska granskningen av den senaste ändringen."
-    },
     {
       "rubrik": "Inspelningen i React: tåligare vid nätavbrott under långa möten",
       "lage": "Inspelningen i nya webbappen klarar nätavbrott; de två sista gränserna rättas i sessionskontrollen innan den landar.",

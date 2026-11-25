@@ -1,6 +1,6 @@
 ---
 title: Ta över arbetet
-description: Läget, ordningen och det som väntar på beslut, för den som tar över arbetet med tal till text i produktion.
+description: Sammanfattning och status för tal till text i Eneo, och läget, ordningen och det som väntar på beslut för den som tar över arbetet.
 ---
 
 import { Badge } from '@astrojs/starlight/components';
@@ -33,6 +33,49 @@ export const uppgifter = (epic) => {
 	const s = a.filter((x) => x.tillstand.startsWith('stängt')).length;
 	return `${a.length} ${a.length === 1 ? 'uppgift' : 'uppgifter'}, ${s} ${s === 1 ? 'stängd' : 'stängda'}`;
 };
+
+## Sammanfattning 25 november
+
+Tal till text i Eneo är nära en första version som går att prova skarpt. Gallringen i Flöden landade i dag, modulen för tal till text fick en ny utgåva, och det som återstår före eneo-test är att bygga en avbild, prova den och ta stegen för driften.
+
+### På plats i dag
+
+- **Flöden med tal till text.** Ett möte spelas in eller laddas upp, transkriberas, får sina talare utpekade och blir ett dokument. Det finns i React-appen på Flödes-grenen, den gren där Flöden byggs.
+- **Gallring i Flöden, första versionen.** Del 1 landade 24 november och del 2 i dag ([#1516](https://github.com/eneo-ai/eneo/pull/1516)). Körningar och deras filer tas nu bort automatiskt när spacets gallringstid har gått.
+- **Modulen för tal till text, version 0.1.33** (25 november). Modulen är sidan där en person spelar in eller laddar upp ett möte och får sitt dokument. Den nya utgåvan gör uppladdningen tålig på en svag uppkoppling: den väntar och försöker själv igen i stället för att ge upp.
+- **Talaridentifieringen** i version 0.2.1, och **livetext** (text medan någon spelar in) på Flödes-grenen.
+
+### Så fungerar gallringen
+
+1. En administratör sätter en gallringstid på ett space (en yta i Eneo), till exempel 30 dagar. Utan en tid tas ingenting bort.
+2. Tiden gäller allt i spacet: samtalen, och nu också körningarna i spacets flöden. Ett flöde kan ha en kortare tid, aldrig en längre.
+3. Var femte minut tar Eneo bort de körningar som är äldre än tiden, med allt som hör till dem: ljudet, transkriptet och dokumenten som flödet skapade.
+4. Gallrat går inte att återställa. Raderna tas bort i databasen, och filernas innehåll tas bort i lagringen.
+
+Fyra skydd finns:
+
+- Bara körningar som startar efter att spacet fick en tid tas bort. Ingenting äldre försvinner av sig självt.
+- En ny eller kortare tid måste bekräftas, eftersom den kan ta bort innehåll direkt.
+- En körning med en spärr mot borttagning står kvar.
+- En körning som inte går att ta bort syns i driftens hälsokontroll.
+
+Det här ingår inte än: uppladdningar som aldrig blev en körning, en egen kortare tid för ljudet, personliga space, och kopior utanför Eneo, som webbläsarens och enhetens kopior och säkerhetskopior. Mer står på [Gallring](/gallring/#första-versionen-i-flöden).
+
+### Kvar före eneo-test
+
+1. **Bygga avbilden och prova den.** En avbild byggs ur Flödes-grenen med gallringen, och den första versionen provas på en separat testserver, inte på eneo-test. Det första bygget efter landningen stannade på ett test i frontendens kontroller. Felet utreds, och bygget körs om när det är rättat.
+2. **Landa det som är byggt och granskas nu.** Inspelningen som klarar nätavbrott, en sessionskontroll som inte kan bli hängande, tydligare adminsidor för att koppla en modell som en annan aktör kör, och ett större fält för långa värden i ett flödes steg.
+3. **Gallringens rester och senare delar.** Först uppladdningar som aldrig blev en körning. Efter testet: ljudets egen tid och personliga space.
+4. **Hämta in develop i Flödes-grenen.** Det är en större sammanslagning: nio ändringar i develop ska in, och tolv filer kräver bedömning.
+5. **Provet genom hela kedjan.** Ett möte går genom modulen, Eneo, talaridentifieringen och transkriberingen, och ska sedan vara borta i varje kopia.
+6. **Stegen för avbilden och driften.** Avbilden låses, uppgraderingen provas på en kopia av eneo-tests databas, och sedan driftsätts den.
+
+Eneo-test kör i dag version 2.3.2. Efter eneo-test återstår det som krävs för produktion: space och ägande, MFA och inställningen i OneGate. Det arbetet är pausat tills eneo-test är klart.
+
+Ordningen steg för steg står under [Gör i den här ordningen](#gör-i-den-här-ordningen), och varje del har en egen sida i menyn.
+
+## För den som tar över
+
 
 Den 26 november tar du över arbetet med tal till text i produktion. Två leveranser återstår: först eneo-test, sedan produktion. Här står läget, ordningen och det som väntar på beslut. Varje del har en egen sida i menyn.
 
@@ -91,7 +134,7 @@ Version 2.4 ges ut från develop, med React och widgets men utan Flöden. Det so
 
 Eneo-test kör i dag 2.3.2 och uppgraderas först när gallringen och de andra stegen före avbilden är klara. Den senaste utgåvan av Eneo är 2.3.3 (23 november). Under tiden ska teamet prova Flöden och tal till text i sina standups på en egen server som sätts upp, utan gallring. Develop synkades senast in i Flödes-grenen den 23 november, och avbilden från grenen är ombyggd med den. Sex ändringar i develop har landat sedan dess och kommer med i nästa synk. Space, ägande och MFA byggs efter eneo-test; med ägandet hör filerna till sitt space så att inget hänger på en enskild person. När Flöden kommer med i en utgåva av Eneo är ännu inte bestämt.
 
-**Gallringen i Flöden: klart och kvar.** Klart är gallringens delade värden, filernas ursprung (landat 23 november) och manuell borttagning av körningshistorik. I dag tar Flöden inte bort något automatiskt. Den 24 november beslutades den första versionen: spacets tid är taket för alla resurser i spacet, också Flöden, och att sätta tiden är påslaget. Ett flöde utan egen tid får spacets tid, och ett flöde kan välja en lägre tid, aldrig en högre. Bara körningar som startar medan spacet har en tid tas bort, och filerna följer körningen: ljud, pdf, skapade dokument och livetext tas bort i samma steg. Med del 1 ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) följer körningshistoriken spacets tid; uppgiften som tar bort automatiskt kommer i del 2. Sedan provas första versionen på en separat testserver. En egen, kortare tid för ljudet, personliga space, en överblick per resurs och tid per steg kommer efter testet. Hela modellen och ordningen står på [Gallring](/gallring/#första-versionen-i-flöden).
+**Gallringen i Flöden: klart och kvar.** Den första versionen har landat i Flödes-grenen: del 1 den 24 november ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och del 2 den 25 november ([#1516](https://github.com/eneo-ai/eneo/pull/1516)). Spacets tid är taket för alla resurser i spacet, också Flöden, och att sätta tiden är påslaget. Ett flöde utan egen tid får spacets tid, och ett flöde kan välja en lägre tid, aldrig en högre. Bara körningar som startar medan spacet har en tid tas bort, och filerna följer körningen: ljud, pdf, skapade dokument och livetext tas bort i samma steg. En uppgift går var femte minut och tar bort det som är äldre än tiden. Kvar: uppladdningar som aldrig blev en körning, och provet av första versionen på en separat testserver. En egen, kortare tid för ljudet, personliga space, en överblick per resurs och tid per steg kommer efter testet. Hela modellen och ordningen står på [Gallring](/gallring/#första-versionen-i-flöden).
 
 ## Nuläge
 
@@ -183,8 +226,8 @@ Punkt 1–4 är ordningen för [första versionen av gallringen i Flöden](/gall
 
 1. **Gjort 24 november: del 1, Leverans och livetext landade i Flödes-grenen.** Gallringens del 1 ([#1513](https://github.com/eneo-ai/eneo/pull/1513)) och Leverans i flödesredigeraren ([#1508](https://github.com/eneo-ai/eneo/pull/1508)) landade 24 november. [Livetext](/livetext/) genom en organisations egen gateway ([#1514](https://github.com/eneo-ai/eneo/pull/1514)) landade samma dag, så alla tre ändringarna mot Flödes-grenen har landat. [Filens ursprung](/forsta-leveransen/#steg-1-5) (steg 1.5) landade 23 november ([#1509](https://github.com/eneo-ai/eneo/pull/1509)). Develop slås in i Flödes-grenen efter varje landning i kärnan; [nästa synk](/vagen-till-produktion/#var-det-byggs-och-hur-det-når-produktion) tar med de sex ändringar som har landat i develop sedan [#1507](https://github.com/eneo-ai/eneo/pull/1507) den 23 november.
 2. **Gjort 24 november: en riktig körning mättes och togs bort för hand.** Körningen i en provmiljö gav 20–22 rader och 1–3 filer. Två körningar togs bort på 0,4 sekunder, filernas innehåll var borta i lagringen efter 6 sekunder, och en gammal länk till en fil gav 404. Det som inte mättes, en riktig transkribering, ett skapat dokument och objektlagring, prövas i del 2.
-3. **Nästa: del 2, borttagningen blir automatisk.** Beskrivningen är skriven och granskad, och bygget pågår. Körningen märks när den startar. En uppgift i kärnans motor går var femte minut och tar bort märkta körningar med sina filer när tiden har gått. En körning som är för stor eller fallerar hoppas över och prövas igen, utan att stoppa resten, och en spärrad körning står kvar. Spacets inställningar säger att tiden gäller alla resurser, också Flöden; en mening visas när tiden sparas och en varning när den kortas. Del 2 är klar när det visas i en körande miljö med åldrade körningar, också att en gammal länk till en fil ger 404.
-4. **Testet på en separat testserver.** En avbild från Flödes-grenen startas på en separat testserver, och första versionen provas där, inte på eneo-test. Modulen ändras inte för testet.
+3. **Gjort 25 november: del 2 landade, borttagningen är automatisk** ([#1516](https://github.com/eneo-ai/eneo/pull/1516)). Körningen märks när den startar. En uppgift i kärnans motor går var femte minut och tar bort märkta körningar med sina filer när tiden har gått. En körning som är för stor, låst eller fallerar hålls kvar och prövas igen, utan att stoppa resten, och en spärrad körning står kvar. Spacets inställningar säger att tiden gäller alla resurser, också Flöden; en ny eller kortare tid måste bekräftas. Tre kända gränser står i PR:en: en tidsgräns i databasen eller en låsning mellan två transaktioner avbryter fortfarande en omgång, en körning vars granskningsrad aldrig levereras står kvar, och uppladdningar som aldrig blev en körning tas inte bort än.
+4. **Nästa: avbilden och testet på en separat testserver.** En avbild byggs ur Flödes-grenen och startas på en separat testserver, och första versionen provas där, inte på eneo-test. Den som driftsätter avbilden ska först se över spacens tider: ett space som redan har en tid börjar ta bort körningar som startar efter uppgraderingen. Modulen ändras inte för testet.
 5. **Gallringens senare delar, efter testet.** Först en egen, kortare tid för ljudet, sedan personliga space, en överblick per resurs i spacets inställningar och sist tid per steg.
 6. **Samtidigt: [modulen och taltjänsterna](/modulen/).** Modulen ändras inte för testet. Kärnans besked för borttaget innehåll, helt eller delvis, bestäms innan ljudets egen tid i punkt 5 byggs. Modulen och talaridentifieringen (vemsa) följer det. Vad som är nästa i talaridentifieringen syns under [Pågår](#pågår).
 7. **[Provet genom modulen](/forsta-leveransen/#steg-prov).** Ett märkt möte går genom modulen, Eneo, talaridentifieringen och transkriberingen. Ljud och transkript ska vara borta i varje kopia, också efter en avbruten process, medan dokumentet står kvar enligt sin regel. Provet görs före eneo-test men har ingen bestämd plats i ordningen ännu.
@@ -213,7 +256,7 @@ Punkt 1–4 är ordningen för [första versionen av gallringen i Flöden](/gall
 
 ## Modulen, kitet, taltjänsterna och livetext
 
-- **Modulen för tal till text** är ute i version 0.1.32 (23 november). En ny tagg sätts först när de automatiska testerna (CI) är gröna efter sammanslagningen och samma avbild har provats mot en riktig kärna.
+- **Modulen för tal till text** är ute i version 0.1.33 (25 november). Utgåvan gör uppladdningen tålig på en svag uppkoppling: en uppladdning som står still väntar och försöker själv igen, släpper sin plats åt andra och börjar om av sig själv. Avbilden provades mot en riktig kärna före taggen. Kvar: att fortsätta en uppladdning efter en omstart av sidan, och ett prov på en riktig telefon.
 - **Modulkitet** är kvar på version 0.1.0, med fyra landade ändringar som ännu inte är utgivna (två brytande). Modulen använder ännu inte kitet.
 - **Talaridentifieringen (vemsa)** är ute i version 0.2.1; nästa steg är ren nedstängning av kön, läsning i ett steg, loggrättning och borttagning på kvittens. **Transkriberingen (vadsa)** saknar utgåva och ägare.
 - **Livetext** (text medan någon spelar in) finns bara på Flödes-grenen. Sedan #1514 (landade 24 november) fungerar den också genom en egen gateway av typen OpenAI.
